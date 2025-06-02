@@ -23,6 +23,8 @@ app.use('/expenses',expensesRoutes)
 app.use("/rents", rentRoutes);
 app.use("/notices", noticeRoutes);
 app.use('foodmenu', require('./routes/menuRoutes'))
+app.use('/api', require('./routes/twilioRoutes'))
+
 app.listen(port,()=>{
     console.log(`Server is running on port ${port}`)
 })
