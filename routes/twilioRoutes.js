@@ -5,7 +5,7 @@ const twilio = require('twilio')
 const router = express.Router();
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-router.post('/api/call', async (req, res) => {
+router.post('/call', async (req, res) => {
   const { parentNumber, mentorNumber } = req.body;
 
   if (!parentNumber || !mentorNumber) {
