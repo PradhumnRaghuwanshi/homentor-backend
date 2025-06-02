@@ -4,13 +4,13 @@ const router = express.Router();
 require("dotenv").config();
 
 router.post("/call", async (req, res) => {
-  const { userNumber, mentorNumber } = req.body;
+  const { parentNumber, mentorNumber } = req.body;
 
   try {
     const response = await axios.post(
       `https://${process.env.EXOTEL_API_KEY}:${process.env.EXOTEL_API_TOKEN}@api.exotel.com/v1/Accounts/${process.env.EXOTEL_SID}/Calls/connect.json`,
       new URLSearchParams({
-        From: userNumber,
+        From: parentNumber,
         To: mentorNumber,
         CallerId: process.env.EXOTEL_VIRTUAL_NUMBER,
         CallType: "trans",
