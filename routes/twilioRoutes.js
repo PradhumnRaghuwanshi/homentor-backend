@@ -1,6 +1,6 @@
 // twilioRoutes.js or in your Express route file
-import express from 'express';
-import twilio from 'twilio';
+const express = require('express')
+const twilio = require('twilio')
 
 const router = express.Router();
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
