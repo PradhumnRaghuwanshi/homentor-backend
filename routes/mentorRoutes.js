@@ -46,17 +46,11 @@ router.post("/", async (req, res) => {
 // PUT resolve mentor
 router.put("/:id", async (req, res) => {
   try {
-    const { adminRanking } = req.body;
 
     const mentor = await Mentor.findByIdAndUpdate(
       req.params.id,
-      { adminRanking },
-      { new: true } // return the updated document
+      req.body
     );
-
-    if (!mentor) {
-      return res.status(404).json({ message: "Mentor not found" });
-    }
 
     res.status(200).json({ data: mentor });
   } catch (error) {
