@@ -12,6 +12,13 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get('/pending-mentors', async(req, res)=>{
+  const pendingMentors = await Mentor.find({
+    status : "Pending"
+  })
+  res.status(200).json({data: pendingMentors})
+})
+
 // GET mentor by ID
 router.get("/:id", async (req, res) => {
   try {
