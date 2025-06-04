@@ -67,6 +67,10 @@ const MentorSchema = new mongoose.Schema({
   },
   adminRanking: {
     type: Number
+  },
+  showOnWebsite:{
+    type: Boolean,
+    default : false
   }
 
 });
