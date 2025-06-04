@@ -19,6 +19,13 @@ router.get('/pending-mentors', async(req, res)=>{
   res.status(200).json({data: pendingMentors})
 })
 
+router.get('/approved-mentors', async(req, res)=>{
+  const pendingMentors = await Mentor.find({
+    status : "Approved"
+  })
+  res.status(200).json({data: pendingMentors})
+})
+
 // GET mentor by ID
 router.get("/:id", async (req, res) => {
   try {
