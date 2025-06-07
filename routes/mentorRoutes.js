@@ -12,6 +12,20 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get('/pending-mentors', async(req, res)=>{
+  const pendingMentors = await Mentor.find({
+    status : "Pending"
+  })
+  res.status(200).json({data: pendingMentors})
+})
+
+router.get('/approved-mentors', async(req, res)=>{
+  const pendingMentors = await Mentor.find({
+    status : "Approved"
+  })
+  res.status(200).json({data: pendingMentors})
+})
+
 // GET mentor by ID
 router.get("/:id", async (req, res) => {
   try {
@@ -39,17 +53,11 @@ router.post("/", async (req, res) => {
 // PUT resolve mentor
 router.put("/:id", async (req, res) => {
   try {
-    const { adminRanking } = req.body;
 
     const mentor = await Mentor.findByIdAndUpdate(
       req.params.id,
-      { adminRanking },
-      { new: true } // return the updated document
+      req.body
     );
-
-    if (!mentor) {
-      return res.status(404).json({ message: "Mentor not found" });
-    }
 
     res.status(200).json({ data: mentor });
   } catch (error) {

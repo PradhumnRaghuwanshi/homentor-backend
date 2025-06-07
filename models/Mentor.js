@@ -70,6 +70,10 @@ const MentorSchema = new mongoose.Schema({
   inHouse: {
     type: Boolean,
     default : false
+  },
+  showOnWebsite:{
+    type: Boolean,
+    default : false
   }
 
 });
