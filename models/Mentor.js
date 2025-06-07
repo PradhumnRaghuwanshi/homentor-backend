@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
 
 const MentorSchema = new mongoose.Schema({
-  fullName: {
-    type: String,
-    required: true,
-  },
+  fullName: { type: String, required: true},
   email: {
     type: String,
     required: true,
@@ -33,6 +30,7 @@ const MentorSchema = new mongoose.Schema({
     specialization: String,
     university: String,
     graduationYear: Number,
+    display : {type:Boolean,  default : false}
   },
   location :{
     area: String,
@@ -67,6 +65,11 @@ const MentorSchema = new mongoose.Schema({
   },
   adminRanking: {
     type: Number
+  },
+  rating: Number,
+  inHouse: {
+    type: Boolean,
+    default : false
   }
 
 });
