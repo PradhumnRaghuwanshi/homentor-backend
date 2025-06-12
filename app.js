@@ -27,6 +27,7 @@ app.use('/users',userRoutes)
 app.use('/api/mentor',mentorRoutes)
 app.use('foodmenu', require('./routes/menuRoutes'))
 app.use('/api', require('./routes/twilioRoutes'))
+app.use('/api', require('./routes/payment'))
 app.use("/api/chat", chatRoutes);
 
 const PORT = 5000;
