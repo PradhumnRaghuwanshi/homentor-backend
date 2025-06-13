@@ -12,6 +12,24 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get('/selected-mentors', async (req, res) => {
+  try {
+    const idsParam = req.query.id;
+
+    if (!idsParam) return res.status(400).json({ error: 'No IDs provided' });
+
+    const idsArray = idsParam.split(',').map((id) => id.trim());
+
+    // Assuming you're using Mongoose and your model is Mentor
+    const mentors = await Mentor.find({ _id: { $in: idsArray } });
+
+    res.json({ mentors });
+  } catch (err) {
+    console.error('Error fetching mentors:', err);
+    res.status(500).json({ error: 'Failed to fetch mentors' });
+  }
+});
+
 router.get('/pending-mentors', async(req, res)=>{
   const pendingMentors = await Mentor.find({
     status : "Pending"
