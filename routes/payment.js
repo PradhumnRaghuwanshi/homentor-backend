@@ -49,7 +49,7 @@ router.post("/create-order", async (req, res) => {
     // const checkoutPageUrl = response.redirectUrl;
     // console.log(checkoutPageUrl);
     console.log(response)
-    res.json({
+    res.send({
       success: true,
       token: response.token,
       merchantOrderId,
