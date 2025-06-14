@@ -24,42 +24,51 @@ const client = StandardCheckoutClient.getInstance(
 );
 
 // Endpoint to create a payment order
-router.post("/create-order", async (req, res) => {
+router.post('/create-order', async (req, res) => {
   try {
-    const  amount  = 100;
+    const { name, email, phone, amount } = req.body;
 
-    const merchantOrderId = randomUUID();
-    const redirectUrl = "https://homentor.onrender.com/mentors"; // Update to your actual redirect URL
+    const transactionId = 'TXN_' + Date.now();
+    const redirectUrl = `https://homentor.onrender.com/payment-success`;
+    const callbackUrl = `https://homentor.onrender.com/payment-callback`;
 
-    const request = CreateSdkOrderRequest.StandardCheckoutBuilder()
-      .merchantOrderId(merchantOrderId)
-      .amount(amount)
-      .redirectUrl(redirectUrl)
-      .build();
+    const payload = {
+      merchantId: "SU2506131953474258261009",
+      merchantTransactionId: transactionId,
+      merchantUserId: phone,
+      amount: amount * 100, // Convert to paise
+      redirectUrl,
+      redirectMode: 'REDIRECT',
+      callbackUrl,
+      mobileNumber: phone,
+      paymentInstrument: {
+        type: 'PAY_PAGE',
+      },
+    };
 
-    // const request = StandardCheckoutPayRequest.builder()
-    //   .merchantOrderId(merchantOrderId)
-    //   .amount(amount)
-    //   .redirectUrl(redirectUrl)
-    //   .build();
+    const payloadStr = JSON.stringify(payload);
+    const base64Payload = Buffer.from(payloadStr).toString('base64');
 
-    const response = await client.createSdkOrder(request);
-    const checkoutUrl = `https://webphonepe.com/v3/merchantpgpui/checkout?token=${response.token}`;
-    // const response = await client.pay(request)
-    // const checkoutPageUrl = response.redirectUrl;
-    // console.log(checkoutPageUrl);
-    console.log(response)
-    res.send({
-      success: true,
-      token: response.token,
-      merchantOrderId,
-      redirectUrl: `https://webphonepe.com/v3/merchantpgpui/checkout?token=${response.token}`,
-    });
+    const dataToHash = base64Payload + '/pg/v1/pay' + 'acef75c8-4bfa-48bd-a763-965912f259a0';
+    const checksum = crypto.createHash('sha256').update(dataToHash).digest('hex');
+    const xVerify = `${checksum}###${1}`;
+
+    const response = await axios.post(
+      `https://api.phonepe.com/apis/hermes/pg/v1/pay`,
+      { request: base64Payload },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-VERIFY': xVerify,
+        },
+      }
+    );
+
+    const { data } = response.data;
+    res.json({ success: true, redirectUrl: data.instrumentResponse.redirectInfo.url });
   } catch (error) {
-    console.error("PhonePe order creation failed:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to create order", error });
+    console.error('PhonePe payment error:', error.response?.data || error.message);
+    res.status(500).json({ success: false, error: 'Payment initiation failed.' });
   }
 });
 
