@@ -8,8 +8,8 @@ const router = express.Router();
 const clientId = 'SU2506131953474258261009';
 const clientSecret = 'acef75c8-4bfa-48bd-a763-965912f259a0';
 const clientVersion = 1; // Usually 1 or latest provided by PhonePe
-const redirectUrl = 'https://homentor.onrender.com/payment-success'; // Must be HTTPS
-const env = Env.PRODUCTION; // Change to Env.SANDBOX for testing
+const redirectUrl = 'https://homentor.onrender.com'; // Must be HTTPS
+const env = Env.PRODUCTION; // Change to Env.PRODUCTION for testing
 
 const client = StandardCheckoutClient.getInstance(clientId, clientSecret, clientVersion, env);
 
@@ -23,7 +23,6 @@ router.post('/create-order', async (req, res) => {
       .merchantOrderId(merchantOrderId)
       .amount(amount * 100) // Convert ₹ to paise
       .redirectUrl(redirectUrl)
-      .mobileNumber(phone)
       .build();
 
     const response = await client.createSdkOrder(request);
