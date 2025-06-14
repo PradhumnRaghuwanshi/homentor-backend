@@ -52,7 +52,7 @@ router.post('/create-order', async (req, res) => {
     const dataToHash = base64Payload + '/pg/v1/pay' + 'acef75c8-4bfa-48bd-a763-965912f259a0';
     const checksum = crypto.createHash('sha256').update(dataToHash).digest('hex');
     const xVerify = `${checksum}###${1}`;
-
+    console.log(payload)
     const response = await axios.post(
       `https://api.phonepe.com/apis/hermes/pg/v1/pay`,
       { request: base64Payload },
