@@ -1,42 +1,85 @@
 const express = require('express');
-const { randomUUID } = require('crypto');
-const { StandardCheckoutClient, Env, CreateSdkOrderRequest } = require('pg-sdk-node');
-
+const crypto = require('crypto');
+const axios = require('axios');
 const router = express.Router();
 
-// 🔐 INSERT YOUR PHONEPE CREDENTIALS HERE
-const clientId = 'SU2506131953474258261009';
-const clientSecret = 'acef75c8-4bfa-48bd-a763-965912f259a0';
-const clientVersion = 1; // Usually 1 or latest provided by PhonePe
-const redirectUrl = 'https://homentor.onrender.com'; // Must be HTTPS
-const env = Env.PRODUCTION; // Change to Env.PRODUCTION for testing
-
-const client = StandardCheckoutClient.getInstance(clientId, clientSecret, clientVersion, env);
+// 🧪 Sandbox credentials (UAT)
+const clientId = 'TEST-M220MIDZKK8US_25060';
+const clientSecret = 'YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0'; // salt key
+const saltIndex = 1;
+const merchantId = 'TEST-M220MIDZKK8US'; // Sandbox merchant ID
+const redirectUrl = 'https://homentor.onrender.com';
+const callbackUrl = 'https://homentor.onrender.com/payment-callback';
 
 router.post('/create-order', async (req, res) => {
+  const { phone, amount } = req.body;
+
+  const merchantTransactionId = 'TXN_' + Date.now();
+
+  const body = {
+    merchantId,
+    merchantTransactionId,
+    merchantUserId: phone || 'user_' + Date.now(),
+    amount: amount * 100,
+    redirectUrl,
+    redirectMode: 'POST',
+    callbackUrl,
+    paymentInstrument: { type: 'PAY_PAGE' }
+  };
+
+  const jsonBody = JSON.stringify(body);
+  const base64Body = Buffer.from(jsonBody).toString('base64');
+
   try {
-    const { amount, phone } = req.body;
+  const decoded = Buffer.from(base64Body, 'base64').toString('utf-8');
+  JSON.parse(decoded); // 👈 this will throw error if JSON is malformed
+  console.log("✅ Base64 is valid JSON");
+} catch (err) {
+  console.error("❌ Invalid Base64 or JSON:", err.message);
+}
 
-    const merchantOrderId = randomUUID();
+  const xVerify = crypto
+    .createHash('sha256')
+    .update(base64Body + '/checkout/v2/sdk/order' + clientSecret)
+    .digest('hex') + '###' + saltIndex;
 
-    const request = CreateSdkOrderRequest.StandardCheckoutBuilder()
-      .merchantOrderId(merchantOrderId)
-      .amount(amount * 100) // Convert ₹ to paise
-      .redirectUrl(redirectUrl)
-      .build();
+  console.log("🟢 JSON:", jsonBody);
+  console.log("🟢 Base64:", base64Body);
+  console.log("🟢 x-verify:", xVerify);
 
-    const response = await client.createSdkOrder(request);
+  try {
+    const response = await axios.post(
+      'https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/sdk/order',
+      base64Body,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-VERIFY': xVerify,
+          'X-CLIENT-ID': clientId
+        },
+        transformRequest: [(data) => data]
+      }
+    );
 
-    const token = response.token;
-    const phonePeRedirectUrl = `https://api.phonepe.com/apis/pg/checkout/v2/sdk/order?token=${token}&merchantId=${clientId}`;
+    const orderToken = response.data?.data?.instrumentResponse?.token;
 
-    return res.json({ success: true, redirectUrl: phonePeRedirectUrl });
+    if (!orderToken) {
+      return res.status(500).json({ error: 'Token not generated', response: response.data });
+    }
+
+    const paymentUrl = `https://web.phonepe.com/test-sdk/v3/pay?token=${orderToken}&merchantId=${merchantId}`;
+
+    return res.json({
+      success: true,
+      redirectUrl: paymentUrl,
+      merchantTransactionId
+    });
+
   } catch (err) {
-    console.error('PhonePe Error:', err.message || err);
+    console.error('❌ PhonePe error:', err.response?.data || err.message);
     return res.status(500).json({
-      success: false,
-      message: 'Payment initiation failed',
-      error: err.message || err,
+      error: 'Failed to create PhonePe order',
+      details: err.response?.data || err.message
     });
   }
 });
