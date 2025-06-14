@@ -28,7 +28,7 @@ router.post('/create-order', async (req, res) => {
     const response = await client.createSdkOrder(request);
 
     const token = response.token;
-    const phonePeRedirectUrl = `https://api.phonepe.com/apis/hermes/pg/v1/pay?token=${token}&merchantId=${clientId}`;
+    const phonePeRedirectUrl = `https://api.phonepe.com/apis/pg/checkout/v2/sdk/order?token=${token}&merchantId=${clientId}`;
 
     return res.json({ success: true, redirectUrl: phonePeRedirectUrl });
   } catch (err) {
