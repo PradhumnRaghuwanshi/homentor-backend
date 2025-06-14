@@ -1,74 +1,44 @@
-// paymentRoutes.js
-const express = require("express");
-const {
-  StandardCheckoutClient,
-  Env,
-  CreateSdkOrderRequest,
-  StandardCheckoutPayRequest,
-} = require("pg-sdk-node");
-const { randomUUID } = require("crypto");
+const express = require('express');
+const { randomUUID } = require('crypto');
+const { StandardCheckoutClient, Env, CreateSdkOrderRequest } = require('pg-sdk-node');
 
 const router = express.Router();
 
-// Replace with actual values from PhonePe dashboard
-const clientId = "SU2506131953474258261009";
-const clientSecret = "acef75c8-4bfa-48bd-a763-965912f259a0";
-const clientVersion = 1;
-const env = Env.PRODUCTION; // Change to Env.PRODUCTION for live
+// 🔐 INSERT YOUR PHONEPE CREDENTIALS HERE
+const clientId = 'SU2506131953474258261009';
+const clientSecret = 'acef75c8-4bfa-48bd-a763-965912f259a0';
+const clientVersion = 1; // Usually 1 or latest provided by PhonePe
+const redirectUrl = 'https://homentor.onrender.com/payment-success'; // Must be HTTPS
+const env = Env.PRODUCTION; // Change to Env.SANDBOX for testing
 
-const client = StandardCheckoutClient.getInstance(
-  clientId,
-  clientSecret,
-  clientVersion,
-  env
-);
+const client = StandardCheckoutClient.getInstance(clientId, clientSecret, clientVersion, env);
 
-// Endpoint to create a payment order
 router.post('/create-order', async (req, res) => {
   try {
-    const { name, email, phone, amount } = req.body;
+    const { amount, phone } = req.body;
 
-    const transactionId = 'TXN_' + Date.now();
-    const redirectUrl = `https://homentor.onrender.com/payment-success`;
-    const callbackUrl = `https://homentor.onrender.com/payment-callback`;
+    const merchantOrderId = randomUUID();
 
-    const payload = {
-      merchantId: "SU2506131953474258261009",
-      merchantTransactionId: transactionId,
-      merchantUserId: phone,
-      amount: amount * 100, // Convert to paise
-      redirectUrl,
-      redirectMode: 'REDIRECT',
-      callbackUrl,
-      mobileNumber: phone,
-      paymentInstrument: {
-        type: 'PAY_PAGE',
-      },
-    };
+    const request = CreateSdkOrderRequest.StandardCheckoutBuilder()
+      .merchantOrderId(merchantOrderId)
+      .amount(amount * 100) // Convert ₹ to paise
+      .redirectUrl(redirectUrl)
+      .mobileNumber(phone)
+      .build();
 
-    const payloadStr = JSON.stringify(payload);
-    const base64Payload = Buffer.from(payloadStr).toString('base64');
+    const response = await client.createSdkOrder(request);
 
-    const dataToHash = base64Payload + '/pg/v1/pay' + 'acef75c8-4bfa-48bd-a763-965912f259a0';
-    const checksum = crypto.createHash('sha256').update(dataToHash).digest('hex');
-    const xVerify = `${checksum}###${1}`;
-    console.log(payload)
-    const response = await axios.post(
-      `https://api.phonepe.com/apis/hermes/pg/v1/pay`,
-      { request: base64Payload },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-VERIFY': xVerify,
-        },
-      }
-    );
+    const token = response.token;
+    const phonePeRedirectUrl = `https://web.phonepe.com/sdk/v3/pay?token=${token}&merchantId=${clientId}`;
 
-    const { data } = response.data;
-    res.json({ success: true, redirectUrl: data.instrumentResponse.redirectInfo.url });
-  } catch (error) {
-    console.error('PhonePe payment error:', error.response?.data || error.message);
-    res.status(500).json({ success: false, error: 'Payment initiation failed.' });
+    return res.json({ success: true, redirectUrl: phonePeRedirectUrl });
+  } catch (err) {
+    console.error('PhonePe Error:', err.message || err);
+    return res.status(500).json({
+      success: false,
+      message: 'Payment initiation failed',
+      error: err.message || err,
+    });
   }
 });
 
