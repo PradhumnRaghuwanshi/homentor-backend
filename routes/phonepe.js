@@ -9,7 +9,7 @@ const router = express.Router()
 const clientSecret = "YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0";
 const clientVersion = 1;
 const clientId = "TEST-M220MIDZKK8US_25060";
-const env = Env.SANDBOX; //change to Env.PRODUCTION when you go live
+const env = Env.PRODUCTION; //change to Env.PRODUCTION when you go live
 
 const client = StandardCheckoutClient.getInstance(
   clientId,
@@ -25,6 +25,7 @@ const redirectUrl = "https://homentor.onrender.com";
 
 // Async helper function to create the order
 async function createPhonePeOrder() {
+    let url = ''
   const merchantOrderId = randomUUID(); // Unique order ID
   const amount = 10000; // Amount in paise (₹100)
   const redirectUrl = "https://homentor.onrender.com/payment-success"; // Your post-payment page
@@ -37,16 +38,20 @@ async function createPhonePeOrder() {
 
   const response = await client.pay(request).then((response) => {
   const checkoutPageUrl = response.redirectUrl;
+  url = checkoutPageUrl
   console.log(checkoutPageUrl);
-  return checkoutPageUrl; 
+   
 });
+    return url;
   // This is the checkout page URL
 }
 
 // Payment endpoint
 router.post("/pay-now", async (req, res) => {
   try {
+    
     const redirectUrl = await createPhonePeOrder();
+
     console.log("Redirecting to:", redirectUrl);
     res.redirect(redirectUrl); // ✅ Server-side redirect
   } catch (err) {
