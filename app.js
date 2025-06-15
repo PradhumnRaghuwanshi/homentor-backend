@@ -22,6 +22,9 @@ const io = new Server(server, {
 setupSocket(io);
 app.use(cors())
 app.use(express.json())
+// Routes
+const phonePeRoutes = require('./routes/phonepe');
+app.use('/api', phonePeRoutes);
 app.use('/admin',adminRoutes)
 app.use('/users',userRoutes)
 app.use('/api/mentor',mentorRoutes)
