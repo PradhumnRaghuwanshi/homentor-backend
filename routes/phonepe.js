@@ -38,8 +38,9 @@ async function createPhonePeOrder() {
   const response = await client.pay(request).then((response) => {
   const checkoutPageUrl = response.redirectUrl;
   console.log(checkoutPageUrl);
+  return checkoutPageUrl; 
 });
-  return checkoutPageUrl; // This is the checkout page URL
+  // This is the checkout page URL
 }
 
 // Payment endpoint
