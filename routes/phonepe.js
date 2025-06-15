@@ -53,7 +53,7 @@ router.post("/pay-now", async (req, res) => {
     const redirectUrl = await createPhonePeOrder();
 
     console.log("Redirecting to:", redirectUrl);
-    res.redirect(redirectUrl); // ✅ Server-side redirect
+    res.json(redirectUrl); // ✅ Server-side redirect
   } catch (err) {
     console.error("PhonePe Payment Error:", err);
     res.status(500).send("Payment Failed");
