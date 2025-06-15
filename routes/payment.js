@@ -8,26 +8,6 @@ const SALT_KEY = "YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0";
 const SALT_INDEX = 1;
 const BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay";
 
-const {
-  StandardCheckoutClient,
-  Env,
-  CreateSdkOrderRequest,
-} = require("pg-sdk-node");
-const { randomUUID } = require("crypto");
-const { default: Response } = require("twilio/lib/http/response");
-
-// Replace with actual values from PhonePe dashboard
-const clientId = "TEST-M220MIDZKK8US_25060";
-const clientSecret = "YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0";
-const clientVersion = 1;
-const env = Env.SANDBOX; // Change to Env.PRODUCTION for live
-
-const client = StandardCheckoutClient.getInstance(
-  clientId,
-  clientSecret,
-  clientVersion,
-  env
-);
 
 // Endpoint to create a payment order
 router.post("/create-order", async (req, res) => {
@@ -63,6 +43,7 @@ router.post("/create-order", async (req, res) => {
       body: JSON.stringify({ request: base64Payload })
     });
     const data = await response.json();
+    console.log("PhonePe API Response:", data);
     res.json(data);
     
   } catch (error) {
