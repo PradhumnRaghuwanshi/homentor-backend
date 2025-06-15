@@ -5,6 +5,7 @@ const { createPhonePeOrder } = require('../utils/phonepe-utils');
 router.get('/pay-now', async (req, res) => {
   try {
     const { redirectUrl } = await createPhonePeOrder();
+    console.log(redirectUrl)
     return res.redirect(redirectUrl); // ✅ Server-side redirect
   } catch (err) {
     console.error("Payment Error:", err.message);
