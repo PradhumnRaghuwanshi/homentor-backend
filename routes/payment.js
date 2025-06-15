@@ -2,6 +2,7 @@
 const express = require('express')
 const { StandardCheckoutClient, Env, CreateSdkOrderRequest } = require('pg-sdk-node');
 const { randomUUID } = require('crypto');
+const { default: Response } = require('twilio/lib/http/response');
 
 const router = express.Router();
 
@@ -19,16 +20,16 @@ router.post("/create-order", async (req, res) => {
     const { amount } = req.body;
 
     const merchantOrderId = randomUUID();
-    const redirectUrl = "https://homentor.onrender.com"; // Update to your actual redirect URL
+    const redirectUrl = "https://homentor.onrender.com/payment-status"; // Update to your actual redirect URL
 
     const request = CreateSdkOrderRequest.StandardCheckoutBuilder()
       .merchantOrderId(merchantOrderId)
-      .amount(amount)
+      .amount(1000)
       .redirectUrl(redirectUrl)
       .build();
 
     const response = await client.createSdkOrder(request);
-
+    console.log(response)
     res.json({
       success: true,
       token: response.token,
