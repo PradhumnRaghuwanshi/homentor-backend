@@ -15,12 +15,13 @@ const redirectAfterPayment = 'https://homentor.onrender.com/'; // Set your front
 // Get token
 async function getPhonePeToken() {
   const response = await axios.post(`${phonepeBaseUrl}/oauth/token`, {
+    client_version: 1,
     clientId,
     clientSecret,
     grantType: 'client_credentials',
   }, {
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     }
   });
   console.log(response.data.token)
