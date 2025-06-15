@@ -3,84 +3,62 @@ const crypto = require('crypto');
 const axios = require('axios');
 const router = express.Router();
 
-// 🧪 Sandbox credentials (UAT)
-const clientId = 'TEST-M220MIDZKK8US_25060';
-const clientSecret = 'YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0'; // salt key
+const merchantId = 'TEST-M220MIDZKK8US';
+const clientSecret = 'YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0';
 const saltIndex = 1;
-const merchantId = 'TEST-M220MIDZKK8US'; // Sandbox merchant ID
-const redirectUrl = 'https://homentor.onrender.com';
-const callbackUrl = 'https://homentor.onrender.com/payment-callback';
 
 router.post('/create-order', async (req, res) => {
-  const { phone, amount } = req.body;
+  const { amount, phone } = req.body;
+  const merchantOrderId = 'ORDER_' + Date.now();
 
-  const merchantTransactionId = 'TXN_' + Date.now();
-
-  const body = {
-    merchantId,
-    merchantTransactionId,
-    merchantUserId: phone || 'user_' + Date.now(),
-    amount: amount * 100,
-    redirectUrl,
-    redirectMode: 'POST',
-    callbackUrl,
-    paymentInstrument: { type: 'PAY_PAGE' }
+  const payload = {
+    merchantOrderId,
+    amount: amount * 100, // in paisa
+    expireAfter: 1200,
+    metaInfo: {
+      udf1: phone
+    },
+    paymentFlow: {
+      type: "PG_CHECKOUT"
+    }
   };
 
-  const jsonBody = JSON.stringify(body);
-  const base64Body = Buffer.from(jsonBody).toString('base64');
+  const jsonPayload = JSON.stringify(payload);
+  const base64Payload = Buffer.from(jsonPayload).toString('base64');
 
-  try {
-  const decoded = Buffer.from(base64Body, 'base64').toString('utf-8');
-  JSON.parse(decoded); // 👈 this will throw error if JSON is malformed
-  console.log("✅ Base64 is valid JSON");
-} catch (err) {
-  console.error("❌ Invalid Base64 or JSON:", err.message);
-}
-
-  const xVerify = crypto
-    .createHash('sha256')
-    .update(base64Body + '/checkout/v2/sdk/order' + clientSecret)
-    .digest('hex') + '###' + saltIndex;
-
-  console.log("🟢 JSON:", jsonBody);
-  console.log("🟢 Base64:", base64Body);
-  console.log("🟢 x-verify:", xVerify);
+  const stringToHash = base64Payload + '/pg/v1/order/token' + clientSecret;
+  const xVerify = crypto.createHash('sha256').update(stringToHash).digest('hex') + '###' + saltIndex;
 
   try {
     const response = await axios.post(
-      'https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/sdk/order',
-      base64Body,
+      'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/order/token',
+      base64Payload,
       {
         headers: {
           'Content-Type': 'application/json',
           'X-VERIFY': xVerify,
-          'X-CLIENT-ID': clientId
-        },
-        transformRequest: [(data) => data]
+          'X-MERCHANT-ID': merchantId,
+          'Authorization': 'O-Bearer ' + base64Payload
+        }
       }
     );
 
-    const orderToken = response.data?.data?.instrumentResponse?.token;
-
-    if (!orderToken) {
+    const token = response.data?.data?.token;
+    if (!token) {
       return res.status(500).json({ error: 'Token not generated', response: response.data });
     }
 
-    const paymentUrl = `https://web.phonepe.com/test-sdk/v3/pay?token=${orderToken}&merchantId=${merchantId}`;
+    const redirectUrl = `https://web.phonepe.com/test-merchant-simulator/pg/v1/pay/${token}`;
 
     return res.json({
       success: true,
-      redirectUrl: paymentUrl,
-      merchantTransactionId
+      token,
+      redirectUrl,
+      orderId: merchantOrderId
     });
-
-  } catch (err) {
-    console.error('❌ PhonePe error:', err.response?.data || err.message);
-    return res.status(500).json({
-      error: 'Failed to create PhonePe order',
-      details: err.response?.data || err.message
-    });
+  } catch (error) {
+    console.error("PhonePe Checkout Error:", error.response?.data || error.message);
+    res.status(500).json({ error: 'PhonePe Token API failed', details: error.response?.data });
   }
 });
 
