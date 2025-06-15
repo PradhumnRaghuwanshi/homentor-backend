@@ -6,9 +6,9 @@ const {
 const { randomUUID } = require("crypto");
 const express = require('express')
 const router = express.Router()
-const clientSecret = "YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0";
+const clientSecret = "acef75c8-4bfa-48bd-a763-965912f259a0";
 const clientVersion = 1;
-const clientId = "TEST-M220MIDZKK8US_25060";
+const clientId = "SU2506131953474258261009";
 const env = Env.PRODUCTION; //change to Env.PRODUCTION when you go live
 
 const client = StandardCheckoutClient.getInstance(
