@@ -1,65 +1,44 @@
-const express = require('express');
-const crypto = require('crypto');
-const axios = require('axios');
+// paymentRoutes.js
+const express = require('express')
+const { StandardCheckoutClient, Env, CreateSdkOrderRequest } = require('pg-sdk-node');
+const { randomUUID } = require('crypto');
+
 const router = express.Router();
 
-const merchantId = 'TEST-M220MIDZKK8US';
-const clientSecret = 'YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0';
-const saltIndex = 1;
+// Replace with actual values from PhonePe dashboard
+const clientId = "TEST-M220MIDZKK8US_25060";
+const clientSecret = "YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0";
+const clientVersion = 1;
+const env = Env.SANDBOX; // Change to Env.PRODUCTION for live
 
-router.post('/create-order', async (req, res) => {
-  const { amount, phone } = req.body;
-  const merchantOrderId = 'ORDER_' + Date.now();
+const client = StandardCheckoutClient.getInstance(clientId, clientSecret, clientVersion, env);
 
-  const payload = {
-    merchantOrderId,
-    amount: amount * 100, // in paisa
-    expireAfter: 1200,
-    metaInfo: {
-      udf1: phone
-    },
-    paymentFlow: {
-      type: "PG_CHECKOUT"
-    }
-  };
-
-  const jsonPayload = JSON.stringify(payload);
-  const base64Payload = Buffer.from(jsonPayload).toString('base64');
-
-  const stringToHash = base64Payload + '/pg/v1/order/token' + clientSecret;
-  const xVerify = crypto.createHash('sha256').update(stringToHash).digest('hex') + '###' + saltIndex;
-
+// Endpoint to create a payment order
+router.post("/create-order", async (req, res) => {
   try {
-    const response = await axios.post(
-      'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/order/token',
-      base64Payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-VERIFY': xVerify,
-          'X-MERCHANT-ID': merchantId,
-          'Authorization': 'O-Bearer ' + base64Payload
-        }
-      }
-    );
+    const { amount } = req.body;
 
-    const token = response.data?.data?.token;
-    if (!token) {
-      return res.status(500).json({ error: 'Token not generated', response: response.data });
-    }
+    const merchantOrderId = randomUUID();
+    const redirectUrl = "https://homentor.onrender.com"; // Update to your actual redirect URL
 
-    const redirectUrl = `https://web.phonepe.com/test-merchant-simulator/pg/v1/pay/${token}`;
+    const request = CreateSdkOrderRequest.StandardCheckoutBuilder()
+      .merchantOrderId(merchantOrderId)
+      .amount(amount)
+      .redirectUrl(redirectUrl)
+      .build();
 
-    return res.json({
+    const response = await client.createSdkOrder(request);
+
+    res.json({
       success: true,
-      token,
-      redirectUrl,
-      orderId: merchantOrderId
+      token: response.token,
+      merchantOrderId,
+      redirectUrl: `https://mercury-uat.phonepe.com/transact/uat_v2?token=${response.token}`,
     });
   } catch (error) {
-    console.error("PhonePe Checkout Error:", error.response?.data || error.message);
-    res.status(500).json({ error: 'PhonePe Token API failed', details: error.response?.data });
+    console.error("PhonePe order creation failed:", error);
+    res.status(500).json({ success: false, message: "Failed to create order", error });
   }
 });
 
-module.exports = router;
+module.exports = router
