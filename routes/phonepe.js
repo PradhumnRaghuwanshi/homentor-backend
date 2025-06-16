@@ -27,7 +27,7 @@ const redirectUrl = "https://homentor.onrender.com";
 async function createPhonePeOrder() {
     let url = ''
   const merchantOrderId = randomUUID(); // Unique order ID
-  const amount = 10000; // Amount in paise (₹100)
+  const amount = 5000000; // Amount in paise (₹100)
   const redirectUrl = "https://homentor.onrender.com/payment-success"; // Your post-payment page
 
   const request = StandardCheckoutPayRequest.builder()
