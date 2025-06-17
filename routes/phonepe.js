@@ -24,15 +24,15 @@ const redirectUrl = "https://homentor.onrender.com";
 
 
 // Async helper function to create the order
-async function createPhonePeOrder() {
-    let url = ''
+async function createPhonePeOrder(amount) {
+  let url = ''
   const merchantOrderId = randomUUID(); // Unique order ID
-  const amount = 5000000; // Amount in paise (₹100)
-  const redirectUrl = "https://homentor.onrender.com/payment-success"; // Your post-payment page
+  
+  const redirectUrl = "https://homentor.onrender.com/payment-successful"; // Your post-payment page
 
   const request = StandardCheckoutPayRequest.builder()
     .merchantOrderId(merchantOrderId)
-    .amount(amount)
+    .amount(amount*100)
     .redirectUrl(redirectUrl)
     .build();
 
@@ -43,14 +43,14 @@ async function createPhonePeOrder() {
    
 });
     return url;
-  // This is the checkout page URL
 }
 
 // Payment endpoint
 router.post("/pay-now", async (req, res) => {
   try {
     
-    const redirectUrl = await createPhonePeOrder();
+    const amount = await req.body.amount
+    const redirectUrl = await createPhonePeOrder(amount);
 
     console.log("Redirecting to:", redirectUrl);
     res.json(redirectUrl); // ✅ Server-side redirect
