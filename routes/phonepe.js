@@ -48,7 +48,6 @@ async function createPhonePeOrder(amount) {
 // Payment endpoint
 router.post("/pay-now", async (req, res) => {
   try {
-    
     const amount = await req.body.amount
     const redirectUrl = await createPhonePeOrder(amount);
 

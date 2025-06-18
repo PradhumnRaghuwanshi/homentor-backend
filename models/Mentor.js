@@ -59,6 +59,7 @@ const MentorSchema = new mongoose.Schema({
     default: "Pending"
   },
   brief : String,
+  adminBrief : String
   createdAt: {
     type: Date,
     default: Date.now,
