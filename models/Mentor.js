@@ -60,6 +60,10 @@ const MentorSchema = new mongoose.Schema({
   },
   brief : String,
   adminBrief : String,
+  adminBriefVisible: {
+    type: Boolean,
+    default : false
+  },
   createdAt: {
     type: Date,
     default: Date.now,
