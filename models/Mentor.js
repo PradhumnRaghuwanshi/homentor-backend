@@ -40,8 +40,11 @@ const MentorSchema = new mongoose.Schema({
     lon: Number
   },
   experience: {
-    type: String,
-    required: true, // in years
+    type: String, // in years
+  },
+  experienceDisplay: {
+    type: Boolean,
+    default: false,
   },
   teachingRange: String,
   teachingModes: Object,
