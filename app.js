@@ -4,6 +4,8 @@ const connectDB = require('./configDB/db')
 const http = require('http');
 const { Server } = require("socket.io");
 const setupSocket = require('./routes/socket');
+const otpRoutes = require("./routes/otpRoutes");
+
 
 connectDB()
 const adminRoutes = require('./routes/adminRoutes')
@@ -25,8 +27,11 @@ app.use(express.json())
 // Routes
 const phonePeRoutes = require('./routes/phonepe');
 app.use('/api', phonePeRoutes);
+app.use("/api/otp", otpRoutes);
+
 app.use('/admin',adminRoutes)
-app.use('/users',userRoutes)
+app.use('/api/users',userRoutes)
+app.use('/api', require('./routes/authRoutes'))
 app.use('/api/mentor',mentorRoutes)
 app.use('foodmenu', require('./routes/menuRoutes'))
 app.use('/api', require('./routes/twilioRoutes'))

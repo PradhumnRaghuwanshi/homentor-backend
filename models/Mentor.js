@@ -46,7 +46,10 @@ const MentorSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  teachingRange: String,
+  teachingRange: {
+    type: String,
+    default: "3 km"
+  },
   teachingModes: Object,
   teachingPreferences: Object,
   availableDays: {
