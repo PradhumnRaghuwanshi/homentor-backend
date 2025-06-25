@@ -11,6 +11,17 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.post("/login-check", async (req, res) => {
+  try {
+    const mentor = await Mentor.findOne({phone : req.body.phone})
+    if (!mentor){
+      res.status(404).json({ message: "Mentor not found" });
+    }
+    res.status(200).json({ data: mentor });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.get('/selected-mentors', async (req, res) => {
   try {
@@ -50,6 +61,15 @@ router.get('/visible-mentors', async(req, res)=>{
     showOnWebsite : true
   })
   res.status(200).json({data: visibleMentors})
+})
+
+router.get('/gold-mentor', async(req, res)=>{
+  const goldMentors = await Mentor.find({
+    status : "Approved",
+    showOnWebsite : true,
+    inHouse : true
+  })
+  res.status(200).json({data: goldMentors})
 })
 
 // GET mentor by ID
