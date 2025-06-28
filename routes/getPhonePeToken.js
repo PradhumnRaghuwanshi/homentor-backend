@@ -9,14 +9,12 @@ const getPhonePeToken = async () => {
   if (cachedToken && now < tokenExpiry) {
     return cachedToken;
   }
-
   const data = qs.stringify({
     client_id: "TEST-M220MIDZKK8US_25060",
     client_version: "1",
     client_secret: "YWJkZjUyOGYtYjU4ZC00ZjAxLThmOTMtNjM3MmFmYmFiYTY0",
     grant_type: "client_credentials"
   });
-
   try {
     const response = await axios.post(
       "https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token",
