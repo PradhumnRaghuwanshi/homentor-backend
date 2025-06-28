@@ -19,6 +19,19 @@ router.post("/mentor-call", async (req, res) => {
   }
 });
 
+router.put("/mentor-call/:id", async (req, res) => {
+  try {
+    const oldCallData = await CallMentor.findById(req.params.id);
+    await oldCallData.save();
+    res.status(201).json(oldCallData);
+  } catch (err) {
+    console.error("Failed to save parent data:", err);
+    res.status(500).json({ error: "Failed to save parent data" });
+  }
+});
+
+
+
 
 
 module.exports = router;
