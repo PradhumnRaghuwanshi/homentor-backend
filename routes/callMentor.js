@@ -11,6 +11,7 @@ router.get('/mentor-call', async(req, res)=>{
 router.post("/mentor-call", async (req, res) => {
   try {
     const newCallMentor = new CallMentor(req.body);
+    await newCallMentor.save();
     res.status(201).json(newCallMentor);
   } catch (err) {
     console.error("Failed to save call mentor data:", err);
