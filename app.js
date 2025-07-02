@@ -29,7 +29,7 @@ const phonePeRoutes = require('./routes/phonepe');
 app.use('/api', phonePeRoutes);
 app.use("/api/otp", otpRoutes);
 
-app.use('/admin',adminRoutes)
+app.use('/api/admin', adminRoutes)
 app.use('/api/users',userRoutes)
 app.use('/api', require('./routes/authRoutes'))
 app.use('/api', require('./routes/callMentor'))
