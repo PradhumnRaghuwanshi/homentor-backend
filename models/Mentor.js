@@ -63,7 +63,6 @@ const MentorSchema = new mongoose.Schema({
   teachingPreferences: Object,
   availableDays: {
     type: [String],
-    required: true, // e.g. "Weekdays 6-9 PM"
   },
   isAvailable: {
     type: Boolean,
