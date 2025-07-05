@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
 
 const MentorSchema = new mongoose.Schema({
-  fullName: { type: String, required: true},
+  fullName: { type: String, required: true },
   email: {
     type: String,
-    required: true,
     unique: true,
   },
   phone: {
@@ -17,7 +16,6 @@ const MentorSchema = new mongoose.Schema({
   },
   age: {
     type: Number,
-    required: true,
   },
   profilePhoto: {
     type: String,
@@ -30,14 +28,25 @@ const MentorSchema = new mongoose.Schema({
     specialization: String,
     university: String,
     graduationYear: Number,
-    display : {type:Boolean,  default : false}
+    display: { type: Boolean, default: false },
   },
-  location :{
+  twelfthStream: String, // new
+  twelfthBoard: String,
+  graduation: {
+    degree: String,
+    college: String,
+  },
+  postGraduation: {
+    degree: String,
+    college: String,
+  },
+  experience: String,
+  location: {
     area: String,
     city: String,
     state: String,
     lat: Number,
-    lon: Number
+    lon: Number,
   },
   experience: {
     type: String, // in years
@@ -48,7 +57,7 @@ const MentorSchema = new mongoose.Schema({
   },
   teachingRange: {
     type: String,
-    default: "3 km"
+    default: "3 km",
   },
   teachingModes: Object,
   teachingPreferences: Object,
@@ -62,31 +71,31 @@ const MentorSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["Pending", "Approved", "Rejected"],
-    default: "Pending"
+    default: "Pending",
   },
-  brief : String,
-  adminBrief : String,
+  brief: String,
+  teachingExperience: String,
+  adminBrief: String,
   adminBriefVisible: {
     type: Boolean,
-    default : false
+    default: false,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
   adminRanking: {
-    type: Number
+    type: Number,
   },
   rating: Number,
   inHouse: {
     type: Boolean,
-    default : false
+    default: false,
   },
-  showOnWebsite:{
+  showOnWebsite: {
     type: Boolean,
-    default : false
-  }
-
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Mentor", MentorSchema);
