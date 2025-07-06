@@ -88,6 +88,7 @@ router.get("/:id", async (req, res) => {
 // POST new mentor
 router.post("/", async (req, res) => {
   try {
+    console.log(req.body)
     const mentor = new Mentor(req.body);
     const newMentor = await mentor.save();
     res.status(201).json({ data: newMentor });
