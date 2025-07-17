@@ -37,6 +37,8 @@ app.use('/api/mentor',mentorRoutes)
 app.use('/api', require('./routes/twilioRoutes'))
 app.use('/api', require('./routes/payment'))
 app.use("/api/chat", chatRoutes);
+app.use("/api/payment", require("./routes/cashfreePayment.js"));
+
 
 const PORT = 5000;
 server.listen(PORT, () => {
