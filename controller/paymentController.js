@@ -1,4 +1,4 @@
-import { Cashfree, CFEnvironment } from "cashfree-pg";
+const { Cashfree, CFEnvironment } = require("cashfree-pg");
 
 const cashfree = new Cashfree(
   CFEnvironment.PRODUCTION,
@@ -8,7 +8,7 @@ const cashfree = new Cashfree(
   
 );
 
-export const createCashfreeOrder = async (req, res) => {
+const createCashfreeOrder = async (req, res) => {
   try {
     const { amount, customerId, customerName, customerEmail, customerPhone } = req.body;
 
@@ -37,3 +37,5 @@ export const createCashfreeOrder = async (req, res) => {
     });
   }
 };
+
+module.exports = createCashfreeOrder
