@@ -4,33 +4,60 @@ const { Cashfree, CFEnvironment } = require("cashfree-pg");
 
 const router = express.Router();
 const cashfree = new Cashfree(
-  CFEnvironment.PRODUCTION,
-  process.env.CASHFREE_CLIENT_ID,
-  process.env.CASHFREE_CLIENT_SECRET
-  
-  
+    CFEnvironment.PRODUCTION,
+    process.env.CASHFREE_CLIENT_ID,
+    process.env.CASHFREE_CLIENT_SECRET
+
+
 );
 router.post("/create-order", async (req, res) => {
     try {
-        const { amount, customerId, customerName, customerEmail, customerPhone } = req.body;
-
-        const request = {
-            order_amount: amount,
-            order_currency: "INR",
-            customer_details: {
-                customer_id: customerId,
-                customer_name: customerName,
-                customer_email: customerEmail,
-                customer_phone: customerPhone,
+        // const { amount, customerId, customerName, customerEmail, customerPhone } = req.body;
+        const { amount, customerId, customerPhone } = req.body;
+        const response = await axios.post(
+            "https://sandbox.cashfree.com/pg/orders",
+            {
+                order_currency: "INR",
+                order_amount: amount,
+                customer_details: {
+                    customer_id: customerId,
+                    customer_phone: customerPhone,
+                },
+                order_meta: {
+                    return_url: "https://yourfrontenddomain.com/payment-success",
+                },
             },
-            order_meta: {
-                return_url: `https://homentor.onrender.com/payment-successful?orderId=${customerId}`,
-            },
-            order_note: "Payment for your services",
-        };
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-version": "2025-01-01",
+                    "x-client-id": process.env.CASHFREE_CLIENT_ID,
+                    "x-client-secret": process.env.CASHFREE_CLIENT_SECRET,
+                },
+            }
+        );
+        const paymentLink = response.data.payment_link;
 
-        const response = await cashfree.PGCreateOrder(request);
-        res.status(200).json(response.data);
+        res.status(200).json({ paymentLink });
+
+
+        // const request = {
+        //     order_amount: amount,
+        //     order_currency: "INR",
+        //     customer_details: {
+        //         customer_id: customerId,
+        //         customer_name: customerName,
+        //         customer_email: customerEmail,
+        //         customer_phone: customerPhone,
+        //     },
+        //     order_meta: {
+        //         return_url: `https://homentor.onrender.com/payment-successful?orderId=${customerId}`,
+        //     },
+        //     order_note: "Payment for your services",
+        // };
+
+        // const response = await cashfree.PGCreateOrder(request);
+        // res.status(200).json(response.data);
     } catch (error) {
         console.error("Error creating order:", error.response?.data || error.message);
         res.status(500).json({
