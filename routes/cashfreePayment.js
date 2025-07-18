@@ -38,7 +38,7 @@ router.post("/create-order", async (req, res) => {
             }
         );
         const paymentLink = response.data.payment_link;
-
+        console.log(response.data)
         res.status(200).json( response.data );
 
 
