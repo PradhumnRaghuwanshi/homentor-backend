@@ -13,7 +13,7 @@ const cashfree = new Cashfree(
 );
 router.post("/create-order", async (req, res) => {
     try {
-        // const { amount, customerId, customerName, customerEmail, customerPhone } = req.body;
+        
         const { amount, customerId, customerPhone } = req.body;
         const response = await axios.post(
             "https://api.cashfree.com/pg/orders",
@@ -25,7 +25,7 @@ router.post("/create-order", async (req, res) => {
                     customer_phone: customerPhone,
                 },
                 order_meta: {
-                    return_url: "https://yourfrontenddomain.com/payment-success",
+                    return_url: `https://homentor.in/payment-successful?orderId=${customerId}`,
                 },
             },
             {
