@@ -1,19 +1,12 @@
 const express = require("express");
-const { createCashfreeOrder } = require("../controller/paymentController.js");
-const { Cashfree, CFEnvironment } = require("cashfree-pg");
-const  axios  = require("axios");
+const axios = require("axios");
+const Order = require("../models/Order");
 
 const router = express.Router();
-const cashfree = new Cashfree(
-    CFEnvironment.PRODUCTION,
-    process.env.CASHFREE_CLIENT_ID,
-    process.env.CASHFREE_CLIENT_SECRET
 
-
-);
 router.post("/create-order", async (req, res) => {
     try {
-        
+
         const { amount, customerId, customerPhone } = req.body;
         const response = await axios.post(
             "https://api.cashfree.com/pg/orders",
@@ -37,28 +30,17 @@ router.post("/create-order", async (req, res) => {
                 },
             }
         );
-        const paymentLink = response.data.payment_link;
+        const order = response.data;
+
         console.log(response.data)
-        res.status(200).json( response.data );
-
-
-        // const request = {
-        //     order_amount: amount,
-        //     order_currency: "INR",
-        //     customer_details: {
-        //         customer_id: customerId,
-        //         customer_name: customerName,
-        //         customer_email: customerEmail,
-        //         customer_phone: customerPhone,
-        //     },
-        //     order_meta: {
-        //         return_url: `https://homentor.onrender.com/payment-successful?orderId=${customerId}`,
-        //     },
-        //     order_note: "Payment for your services",
-        // };
-
-        // const response = await cashfree.PGCreateOrder(request);
-        // res.status(200).json(response.data);
+        await Order.create({
+            orderId: order.order_id,
+            customerId,
+            amount,
+            userPhone: customerPhone,
+            status: "PENDING", // Initial status
+        });
+        res.status(200).json(response.data);
     } catch (error) {
         console.error("Error creating order:", error.response?.data || error.message);
         res.status(500).json({
@@ -67,5 +49,44 @@ router.post("/create-order", async (req, res) => {
         });
     }
 });
+
+router.get('/verify-order/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+
+    try {
+        const response = await axios.get(`https://api.cashfree.com/pg/orders/${orderId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-version": "2025-01-01",
+                "x-client-id": process.env.CASHFREE_CLIENT_ID,
+                "x-client-secret": process.env.CASHFREE_CLIENT_SECRET,
+            },
+        });
+
+        const orderStatus = response.data.order_status;
+
+        // ✅ Update DB
+        await Order.findOneAndUpdate(
+            { orderId },
+            {
+                orderStatus,
+                verifiedAt: new Date(),
+            },
+            { new: true }
+        );
+
+
+        if (orderStatus === 'PAID') {
+            // ✅ Payment successful
+            return res.status(200).json({ success: true, message: 'Payment verified', data: response.data });
+        } else {
+            // ❌ Not paid yet
+            return res.status(400).json({ success: false, message: 'Payment not completed', status: orderStatus });
+        }
+    } catch (error) {
+        console.error('Error verifying order:', error.response?.data || error.message);
+        return res.status(500).json({ success: false, message: 'Order verification failed' });
+    }
+})
 
 module.exports = router
