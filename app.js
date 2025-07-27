@@ -12,6 +12,7 @@ const adminRoutes = require('./routes/adminRoutes')
 const userRoutes = require('./routes/userRoutes')
 const mentorRoutes = require('./routes/mentorRoutes')
 const chatRoutes = require("./routes/chatRoutes");
+
 const app= express()
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -28,7 +29,7 @@ app.use(express.json())
 const phonePeRoutes = require('./routes/phonepe');
 app.use('/api', phonePeRoutes);
 app.use("/api/otp", otpRoutes);
-
+app.use("/api/class-bookings", require('./routes/classBooking.js'));
 app.use('/api/admin', adminRoutes)
 app.use('/api/users',userRoutes)
 app.use('/api', require('./routes/authRoutes'))
