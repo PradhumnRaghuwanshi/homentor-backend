@@ -26,7 +26,7 @@ router.post("/verify-otp", async (req, res) => {
 
   try {
     const data = await validateOtp(verificationId, code, phone);
-    res.status(200).json({ message: "OTP verified", verificationStatus: data.data.verificationStatus });
+    res.status(200).json({ message: "OTP verified", verificationStatus: data });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
