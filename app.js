@@ -26,7 +26,6 @@ setupSocket(io);
 app.use(cors())
 app.use(express.json())
 // Routes
-const phonePeRoutes = require('./routes/phonepe');
 app.use('/api', phonePeRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/class-bookings", require('./routes/classBooking.js'));
@@ -35,8 +34,6 @@ app.use('/api/users',userRoutes)
 app.use('/api', require('./routes/authRoutes'))
 app.use('/api', require('./routes/callMentor'))
 app.use('/api/mentor',mentorRoutes)
-app.use('/api', require('./routes/twilioRoutes'))
-app.use('/api', require('./routes/payment'))
 app.use("/api/chat", chatRoutes);
 app.use("/api/payment", require("./routes/cashfreePayment.js"));
 
