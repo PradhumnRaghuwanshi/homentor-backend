@@ -8,7 +8,11 @@ const OrderSchema = new mongoose.Schema({
     ref: "Mentor",
     required: true,
   },
-  customerId: String,
+  parent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   amount: Number,
   userPhone: String,
   status: { type: String, default: "PENDING" }, // PENDING, PAID, FAILED

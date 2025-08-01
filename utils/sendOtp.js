@@ -28,4 +28,6 @@ const sendOtp = async (mobileNumber) => {
   }
 };
 
+
+
 module.exports = sendOtp;

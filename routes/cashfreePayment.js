@@ -3,12 +3,13 @@ const axios = require("axios");
 const Order = require("../models/Order");
 const { Cashfree, CFEnvironment } = require("cashfree-pg");
 const User = require("../models/User");
+const ClassBooking = require("../models/ClassBooking");
 const cashfree = new Cashfree(CFEnvironment.PRODUCTION, process.env.CASHFREE_CLIENT_ID, process.env.CASHFREE_CLIENT_SECRET);
 const router = express.Router();
 
 router.post("/create-order", async (req, res) => {
     try {
-        const { amount, customerId, customerPhone, mentorId } = req.body;
+        const { amount, parent, customerPhone, mentorId } = req.body;
         const user = await User.findOne({
             phone: customerPhone
         })
@@ -18,11 +19,11 @@ router.post("/create-order", async (req, res) => {
                 order_currency: "INR",
                 order_amount: amount,
                 customer_details: {
-                    customer_id: customerId,
+                    customer_id: parent,
                     customer_phone: customerPhone,
                 },
                 order_meta: {
-                    return_url: `https://homentor.in/payment-successful?orderId=${customerId}`,
+                    return_url: `https://homentor.in/payment-successful?orderId=${parent}`,
                 },
             },
             {
@@ -39,7 +40,7 @@ router.post("/create-order", async (req, res) => {
         console.log(response.data)
         await Order.create({
             orderId: order.order_id,
-            customerId: user._id,
+            parent: user._id,
             amount,
             userPhone: customerPhone,
             status: "PENDING", // Initial status
@@ -55,12 +56,20 @@ router.post("/create-order", async (req, res) => {
     }
 });
 
+const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLTNGMkU1OTlEMDkzRDRDNCIsImlhdCI6MTc1MDU5MjAyMywiZXhwIjoxOTA4MjcyMDIzfQ.CU0VtNuJu5MzHoSh-ItvVdeYEQqURgRTHymtUtuka-S6fxqzfuLPM8KgoVIMiCc965oZjw-XoKvSPQZhk00S4g";
+
 router.get('/verify-order/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
         const oldOrder = await Order.findOne({
             orderId: orderId
-        })
+        }).populate("mentor", "fullName phone").populate("parent", "phone");
+        const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&parent=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder.parent.phone}&message=Dear Sir/Ma'am, your class booking on Homentor is confirmed! 🎉  Mentor: ${oldOrder.mentor.fullName}. We’re excited to support your child’s learning journey.  Feel free to reach out anytime for help.  - Team Homentor`;
+        const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&parent=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder.mentor.phone}&message=Hello ${oldOrder.mentor.fullName}, you have a new class booking on Homentor! 🎉  
+Parent: ${oldOrder.parent.phone}  
+Let’s deliver an impactful session.  
+- Team Homentor`;
+
         const response = await cashfree.PGOrderFetchPayments(orderId)
         console.log('Order fetched successfully:', response.data);
         const getOrderResponse = response.data;
@@ -70,6 +79,26 @@ router.get('/verify-order/:id', async (req, res) => {
             ).length > 0
         ) {
             oldOrder.status = "success"
+            const response = await axios.post(url, null, {
+
+                headers: {
+                    authToken: token,
+                },
+            });
+            const mentorResponse = await axios.post(mentorUrl, null, {
+
+                headers: {
+                    authToken: token,
+                },
+            });
+            console.log(response.data)
+
+            const newBooking = new ClassBooking({
+                mentor: oldOrder.mentor._id,
+                price: oldOrder.amount,
+                parent: oldOrder.parent._id
+            })
+            await newBooking.save()
         }
         else if (
             getOrderResponse.filter(
