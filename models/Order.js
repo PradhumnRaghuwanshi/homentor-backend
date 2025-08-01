@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 
 const OrderSchema = new mongoose.Schema({
   orderId: { type: String, required: true, unique: true },
+  mentor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Mentor",
+    required: true,
+  },
   customerId: String,
   amount: Number,
   userPhone: String,
