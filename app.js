@@ -36,6 +36,7 @@ app.use('/api', require('./routes/callMentor'))
 app.use('/api/mentor',mentorRoutes)
 app.use("/api/chat", chatRoutes);
 app.use("/api/payment", require("./routes/cashfreePayment.js"));
+app.use("/api/order", require("./routes/orderRoutes.js"));
 
 
 const PORT = 5000;
