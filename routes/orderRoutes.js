@@ -6,7 +6,7 @@ const router = express.Router()
 router.get("/", async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("mentor", "name photo")
+      .populate("mentor", "fullName phone")
       .populate("parent", "name phone");
     res.json(orders);
   } catch (err) {
