@@ -10,6 +10,7 @@ const router = express.Router();
 router.post("/create-order", async (req, res) => {
     try {
         const { amount, customerId, customerPhone, mentorId } = req.body;
+        console.log("MentorId ", mentorId)
         const user = await User.findOne({
             phone: customerPhone
         })
@@ -38,6 +39,7 @@ router.post("/create-order", async (req, res) => {
         const order = response.data;
 
         console.log(response.data)
+
         await Order.create({
             orderId: order.order_id,
             parent: user._id,
