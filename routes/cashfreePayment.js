@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/create-order", async (req, res) => {
     try {
-        const { amount, parent, customerPhone, mentorId } = req.body;
+        const { amount, customerId, customerPhone, mentorId } = req.body;
         const user = await User.findOne({
             phone: customerPhone
         })
@@ -19,11 +19,11 @@ router.post("/create-order", async (req, res) => {
                 order_currency: "INR",
                 order_amount: amount,
                 customer_details: {
-                    customer_id: parent,
+                    customer_id: customerId,
                     customer_phone: customerPhone,
                 },
                 order_meta: {
-                    return_url: `https://homentor.in/payment-successful?orderId=${parent}`,
+                    return_url: `https://homentor.in/payment-successful?orderId=${customerId}`,
                 },
             },
             {
