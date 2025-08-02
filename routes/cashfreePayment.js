@@ -63,7 +63,7 @@ const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLTNGMkU1OTlEMDkzRDRDNCIsImlhdCI6
 router.get('/verify-order/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
-        console.log(orderId);
+        console.log(req.params.id);
         const oldOrder = await Order.findOne({
             orderId: orderId
         }).populate("mentor", "fullName phone").populate("parent", "phone");
