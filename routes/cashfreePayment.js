@@ -63,14 +63,15 @@ const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLTNGMkU1OTlEMDkzRDRDNCIsImlhdCI6
 router.get('/verify-order/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
+        console.log(orderId);
         const oldOrder = await Order.findOne({
             orderId: orderId
         }).populate("mentor", "fullName phone").populate("parent", "phone");
-        const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder.parent.phone}&message=Dear Sir/Ma'am, your class booking on Homentor is confirmed! 🎉  Mentor: ${oldOrder.mentor.fullName}. We’re excited to support your child’s learning journey.  Feel free to reach out anytime for help.  - Team Homentor`;
-        const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder.mentor.phone}&message=Hello ${oldOrder.mentor.fullName}, you have a new class booking on Homentor! 🎉 Parent: ${oldOrder.parent.phone}  Let’s deliver an impactful session.  - Team Homentor`;
+        const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.parent?.phone}&message=Dear Sir/Ma'am, your class booking on Homentor is confirmed! 🎉  Mentor: ${oldOrder?.mentor?.fullName}. We’re excited to support your child’s learning journey.  Feel free to reach out anytime for help.  - Team Homentor`;
+        const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.mentor?.phone}&message=Hello ${oldOrder?.mentor?.fullName}, you have a new class booking on Homentor! 🎉 Parent: ${oldOrder?.parent?.phone}  Let’s deliver an impactful session.  - Team Homentor`;
 
         const response = await cashfree.PGOrderFetchPayments(orderId)
-        
+
         console.log('Order fetched successfully:', response.data);
         const getOrderResponse = response.data;
         if (
