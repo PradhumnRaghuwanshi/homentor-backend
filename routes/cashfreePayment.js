@@ -23,7 +23,7 @@ router.post("/create-order", async (req, res) => {
                     customer_phone: customerPhone,
                 },
                 order_meta: {
-                    return_url: `https://homentor.in/payment-successful?orderId=${customerId}`,
+                    return_url: `https://homentor.in/payment-status?orderId=${customerId}`,
                 },
             },
             {
