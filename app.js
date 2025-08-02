@@ -6,7 +6,6 @@ const { Server } = require("socket.io");
 const setupSocket = require('./routes/socket');
 const otpRoutes = require("./routes/otpRoutes");
 
-
 connectDB()
 const adminRoutes = require('./routes/adminRoutes')
 const userRoutes = require('./routes/userRoutes')
@@ -18,15 +17,12 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "http://localhost:8080" },
   methods: ["GET", "POST"]
-
 });
-
 
 setupSocket(io);
 app.use(cors())
 app.use(express.json())
 // Routes
-app.use('/api', phonePeRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/class-bookings", require('./routes/classBooking.js'));
 app.use('/api/admin', adminRoutes)
