@@ -37,7 +37,16 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
-
+router.put("/booking/:id", async (req, res) => {
+  try {
+    const booking = await ClassBooking.findByIdAndUpdate(req.params.id, req.body);
+    if (!booking)
+      return res.status(404).json({ success: false, message: "Not found" });
+    res.status(200).json({ success: true, data: booking });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
 router.get("/mentor/:id", async (req, res) => {
   try {
     const booking = await ClassBooking.find({

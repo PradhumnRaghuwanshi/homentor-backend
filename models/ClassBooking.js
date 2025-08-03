@@ -22,7 +22,7 @@ const classBookingSchema = new mongoose.Schema({
   bookedDate: { type: Date, required: true, default: Date.now },
   scheduledDate: { type: Date },
   scheduledTime: { type: String },
-  duration: { type: String },
+  duration: { type: String, default : "22" },
   price: { type: Number, required: true },
   type: {
     type: String,
