@@ -64,7 +64,7 @@ router.get("/student/:id", async (req, res) => {
   try {
     const booking = await ClassBooking.find({
       parent : req.params.id
-    });
+    }).populate("mentor", "fullName profilePhoto");
     if (!booking)
       return res.status(404).json({ success: false, message: "Not found" });
     res.status(200).json({ success: true, data: booking });
