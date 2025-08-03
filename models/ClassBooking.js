@@ -31,6 +31,11 @@ const classBookingSchema = new mongoose.Schema({
   },
   rating: { type: Number, min: 1, max: 5 },
   createdAt: { type: Date, default: Date.now },
+  studentName : {type: String},
+  class : {type: String},
+  school : {type: String}
 });
 
+    
+   
 module.exports = mongoose.model("ClassBooking", classBookingSchema);
