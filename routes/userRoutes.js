@@ -20,7 +20,6 @@ router.post("/login-check", async (req, res) => {
     const user = await User.findOne({ phone: req.body.phone });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const response = await sendOtp(user.phone);
     res.status(200).json({ data: user });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
