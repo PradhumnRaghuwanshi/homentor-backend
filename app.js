@@ -25,6 +25,7 @@ app.use(express.json())
 // Routes
 app.use("/api/otp", otpRoutes);
 app.use("/api/class-bookings", require('./routes/classBooking.js'));
+app.use("/api/class-records", require('./routes/classRecordRoutes.js'));
 app.use('/api/admin', adminRoutes)
 app.use('/api/users',userRoutes)
 app.use('/api', require('./routes/authRoutes'))

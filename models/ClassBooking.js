@@ -27,13 +27,13 @@ const classBookingSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ["one-on-one", "consultation"],
-
   },
   rating: { type: Number, min: 1, max: 5 },
   createdAt: { type: Date, default: Date.now },
   studentName : {type: String},
   class : {type: String},
-  school : {type: String}
+  school : {type: String},
+  classesRecord : Array
 });
 
     
