@@ -13,6 +13,7 @@ router.get("/", async (req, res) => {
 });
 router.post("/login-check", async (req, res) => {
   try {
+    console.log( req.body.phone)
     const mentor = await Mentor.findOne({phone : req.body.phone})
     if (!mentor){
       res.status(404).json({ message: "Mentor not found" });
