@@ -18,15 +18,15 @@ const classRecordSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    required: true,
+    // required: true,
   },
   timeIn: {
     type: String,
-    required: true,
+    // required: true,
   },
   timeOut: {
     type: String,
-    required: true,
+    // required: true,
   },
   duration: {
     type: String, // or Number if you calculate in minutes
@@ -34,7 +34,7 @@ const classRecordSchema = new mongoose.Schema({
   },
   topic: {
     type: String,
-    required: true,
+    
   },
   mentorTick: {
     type: Boolean,
