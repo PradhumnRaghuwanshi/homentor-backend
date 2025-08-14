@@ -31,12 +31,13 @@ router.put("/:id", async (req, res) => {
 });
 router.post("/", async (req, res) => {
   try {
-    console.log(req.body)
-    const classRecord = new ClassRecord(req.body)
-    await classRecord.save()
+    console.log(req.body);
+    const classRecord = new ClassRecord(req.body);
+    await classRecord.save();
     res.status(200).json({ data: classRecord });
   } catch (error) {
-    res.status(500).json({ message: error });
+    console.error("Error saving class record:", error);
+    res.status(500).json({ message: error.message || "Something went wrong" });
   }
 });
 
