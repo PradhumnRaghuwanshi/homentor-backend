@@ -32,7 +32,7 @@ router.put("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     console.log(req.body)
-    const classRecord = ClassRecord(req.body)
+    const classRecord = new ClassRecord(req.body)
     await classRecord.save()
     res.status(200).json({ data: classRecord });
   } catch (error) {
