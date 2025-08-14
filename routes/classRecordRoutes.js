@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
     await classRecord.save()
     res.status(200).json({ data: classRecord });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error });
   }
 });
 
