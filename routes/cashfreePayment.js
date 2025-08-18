@@ -72,6 +72,7 @@ router.get('/verify-order/:id', async (req, res) => {
         const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.mentor?.phone}&message=Hello ${oldOrder?.mentor?.fullName}, you have a new class booking on Homentor! 🎉 Parent: ${oldOrder?.parent?.phone}  Let’s deliver an impactful session.  - Team Homentor`;
 
         const response = await cashfree.PGOrderFetchPayments(orderId)
+        console.log(response)
 
         console.log('Order fetched successfully:', response.data);
         const getOrderResponse = response.data;
