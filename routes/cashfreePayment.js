@@ -30,7 +30,7 @@ router.post("/create-order", async (req, res) => {
             {
                 headers: {
                     "Content-Type": "application/json",
-                    "x-api-version": "2025-01-01",
+                    "x-api-version": "2022-09-01",
                     "x-client-id": process.env.CASHFREE_CLIENT_ID,
                     "x-client-secret": process.env.CASHFREE_CLIENT_SECRET,
                 },
@@ -67,16 +67,17 @@ router.get('/verify-order/:id', async (req, res) => {
         const oldOrder = await Order.findOne({
             orderId: orderId
         }).populate("mentor", "fullName phone").populate("parent", "phone");
-        console.log(oldOrder)
+        // console.log(oldOrder)
         const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.parent?.phone}&message=Dear Sir/Ma'am, your class booking on Homentor is confirmed! 🎉  Mentor: ${oldOrder?.mentor?.fullName}. We’re excited to support your child’s learning journey.  Feel free to reach out anytime for help.  - Team Homentor`;
         const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.mentor?.phone}&message=Hello ${oldOrder?.mentor?.fullName}, you have a new class booking on Homentor! 🎉 Parent: ${oldOrder?.parent?.phone}  Let’s deliver an impactful session.  - Team Homentor`;
 
         const response = await cashfree.PGFetchOrder(orderId)
-        const response2 = await cashfree.PGOrderFetchPayment(orderId)
+        console.log('Order fetched successfully:', response.data);
+
+        const response2 = await cashfree.PGOrderFetchPayments(orderId)
         // console.log(response)
         // cashfree.PG
 
-        console.log('Order fetched successfully:', response.data);
         console.log('Order fetched successfully 2:', response2.data);
         const getOrderResponse = response.data;
         // if (
