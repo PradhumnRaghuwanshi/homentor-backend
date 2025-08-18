@@ -86,26 +86,26 @@ router.get('/verify-order/:id', async (req, res) => {
             ).length > 0
         ) {
             oldOrder.status = "success"
-            const response = await axios.post(url, null, {
+            // const response = await axios.post(url, null, {
 
-                headers: {
-                    authToken: token,
-                },
-            });
-            const mentorResponse = await axios.post(mentorUrl, null, {
+            //     headers: {
+            //         authToken: token,
+            //     },
+            // });
+            // const mentorResponse = await axios.post(mentorUrl, null, {
 
-                headers: {
-                    authToken: token,
-                },
-            });
-            // console.log(response.data)
+            //     headers: {
+            //         authToken: token,
+            //     },
+            // });
+            // // console.log(response.data)
 
-            const newBooking = new ClassBooking({
-                mentor: oldOrder.mentor._id,
-                price: oldOrder.amount,
-                parent: oldOrder.parent._id
-            })
-            await newBooking.save()
+            // const newBooking = new ClassBooking({
+            //     mentor: oldOrder.mentor._id,
+            //     price: oldOrder.amount,
+            //     parent: oldOrder.parent._id
+            // })
+            // await newBooking.save()
         }
         else if (
             getOrderResponse.filter(
