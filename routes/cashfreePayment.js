@@ -100,12 +100,12 @@ router.get('/verify-order/:id', async (req, res) => {
             // });
             // // console.log(response.data)
 
-            // const newBooking = new ClassBooking({
-            //     mentor: oldOrder.mentor._id,
-            //     price: oldOrder.amount,
-            //     parent: oldOrder.parent._id
-            // })
-            // await newBooking.save()
+            const newBooking = new ClassBooking({
+                mentor: oldOrder.mentor._id,
+                price: oldOrder.amount,
+                parent: oldOrder.parent._id
+            })
+            await newBooking.save()
         }
         else if (
             getOrderResponse.filter(
