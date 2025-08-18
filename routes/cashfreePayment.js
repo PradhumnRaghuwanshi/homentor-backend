@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/create-order", async (req, res) => {
     try {
         const { amount, customerId, customerPhone, mentorId } = req.body;
-        console.log("MentorId ", mentorId)
+        // console.log("MentorId ", mentorId)
         const user = await User.findOne({
             phone: customerPhone
         })
@@ -38,7 +38,7 @@ router.post("/create-order", async (req, res) => {
         );
         const order = response.data;
 
-        console.log(response.data)
+        // console.log(response.data)
 
         await Order.create({
             orderId: order.order_id,
@@ -72,7 +72,7 @@ router.get('/verify-order/:id', async (req, res) => {
         const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.mentor?.phone}&message=Hello ${oldOrder?.mentor?.fullName}, you have a new class booking on Homentor! 🎉 Parent: ${oldOrder?.parent?.phone}  Let’s deliver an impactful session.  - Team Homentor`;
 
         const response = await cashfree.PGFetchOrder(orderId)
-        console.log(response)
+        // console.log(response)
 
         console.log('Order fetched successfully:', response.data);
         const getOrderResponse = response.data;
@@ -94,7 +94,7 @@ router.get('/verify-order/:id', async (req, res) => {
                     authToken: token,
                 },
             });
-            console.log(response.data)
+            // console.log(response.data)
 
             const newBooking = new ClassBooking({
                 mentor: oldOrder.mentor._id,
