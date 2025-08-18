@@ -71,51 +71,51 @@ router.get('/verify-order/:id', async (req, res) => {
         const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.parent?.phone}&message=Dear Sir/Ma'am, your class booking on Homentor is confirmed! 🎉  Mentor: ${oldOrder?.mentor?.fullName}. We’re excited to support your child’s learning journey.  Feel free to reach out anytime for help.  - Team Homentor`;
         const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.mentor?.phone}&message=Hello ${oldOrder?.mentor?.fullName}, you have a new class booking on Homentor! 🎉 Parent: ${oldOrder?.parent?.phone}  Let’s deliver an impactful session.  - Team Homentor`;
 
-        const response = await cashfree.PGFetchOrder(orderId)
-        console.log('Order fetched successfully:', response.data);
+        // const response = await cashfree.PGFetchOrder(orderId)
+        // console.log('Order fetched successfully:', response.data);
     
-        const response2 = await cashfree.PGOrderFetchPayments(orderId)
+        const response = await cashfree.PGOrderFetchPayments(orderId)
         // console.log(response)
         // cashfree.PG
 
-        console.log('Order fetched successfully 2:', response2.data);
+        console.log('Order fetched successfully 2:', response.data);
         const getOrderResponse = response.data;
-        // if (
-        //     getOrderResponse.filter(
-        //         (transaction) => transaction.payment_status === "SUCCESS"
-        //     ).length > 0
-        // ) {
-        //     oldOrder.status = "success"
-        //     const response = await axios.post(url, null, {
+        if (
+            getOrderResponse.filter(
+                (transaction) => transaction.payment_status === "SUCCESS"
+            ).length > 0
+        ) {
+            oldOrder.status = "success"
+            const response = await axios.post(url, null, {
 
-        //         headers: {
-        //             authToken: token,
-        //         },
-        //     });
-        //     const mentorResponse = await axios.post(mentorUrl, null, {
+                headers: {
+                    authToken: token,
+                },
+            });
+            const mentorResponse = await axios.post(mentorUrl, null, {
 
-        //         headers: {
-        //             authToken: token,
-        //         },
-        //     });
-        //     // console.log(response.data)
+                headers: {
+                    authToken: token,
+                },
+            });
+            // console.log(response.data)
 
-        //     const newBooking = new ClassBooking({
-        //         mentor: oldOrder.mentor._id,
-        //         price: oldOrder.amount,
-        //         parent: oldOrder.parent._id
-        //     })
-        //     await newBooking.save()
-        // }
-        // else if (
-        //     getOrderResponse.filter(
-        //         (transaction) => transaction.payment_status === "PENDING"
-        //     ).length > 0
-        // ) {
-        //     oldOrder.status = "pending"
-        // } else {
-        //     oldOrder.status = "failed"
-        // }
+            const newBooking = new ClassBooking({
+                mentor: oldOrder.mentor._id,
+                price: oldOrder.amount,
+                parent: oldOrder.parent._id
+            })
+            await newBooking.save()
+        }
+        else if (
+            getOrderResponse.filter(
+                (transaction) => transaction.payment_status === "PENDING"
+            ).length > 0
+        ) {
+            oldOrder.status = "pending"
+        } else {
+            oldOrder.status = "failed"
+        }
         await oldOrder.save()
         res.status(200).json(response.data);
     } catch (error) {
