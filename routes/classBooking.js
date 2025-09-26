@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const ClassBooking = require("../models/ClassBooking");
+const mongoose = require("mongoose");
 
 // @desc    Get all class bookings
 // @route   GET /api/class-bookings
@@ -51,7 +52,7 @@ router.get("/mentor/:id", async (req, res) => {
   try {
     console.log(req.params.id)
     const booking = await ClassBooking.find({
-      mentor : req.params.id
+      mentor : mongoose.Types.ObjectId(req.params.id)
     }).populate("parent", "phone")
     if (!booking)
       return res.status(404).json({ success: false, message: "Not found" });
