@@ -49,6 +49,7 @@ router.put("/booking/:id", async (req, res) => {
 });
 router.get("/mentor/:id", async (req, res) => {
   try {
+    console.log(req.params.id)
     const booking = await ClassBooking.find({
       mentor : req.params.id
     }).populate("parent", "phone")
