@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const ClassBooking = require("../models/ClassBooking");
 const mongoose = require("mongoose");
+const User = require("../models/User");
 
 // Get all class bookings
 router.get("/", async (req, res) => {
@@ -30,6 +31,17 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.post("/cash-booking", async (req, res) => {
+  try {
+    
+    const newBooking = new ClassBooking(req.body);
+    const savedBooking = await newBooking.save();
+    res.status(201).json({ success: true, data: savedBooking });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 // @route   GET /api/class-bookings/:id
 router.get("/:id", async (req, res) => {
   try {
@@ -41,6 +53,7 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 router.put("/booking/:id", async (req, res) => {
   try {
     const booking = await ClassBooking.findByIdAndUpdate(req.params.id, req.body);
@@ -51,6 +64,7 @@ router.put("/booking/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 router.get("/mentor/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,7 +115,5 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
-
-
 
 module.exports = router;

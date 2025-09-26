@@ -67,12 +67,6 @@ router.get('/verify-order/:id', async (req, res) => {
         const oldOrder = await Order.findOne({
             orderId: orderId
         }).populate("mentor", "fullName phone").populate("parent", "phone");
-        // console.log(oldOrder)
-        const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.parent?.phone}&message=Dear Sir/Ma'am, your class booking on Homentor is confirmed! 🎉  Mentor: ${oldOrder?.mentor?.fullName}. We’re excited to support your child’s learning journey.  Feel free to reach out anytime for help.  - Team Homentor`;
-        const mentorUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=C-8C8173E3038A484&senderId=UTOMOB&type=SMS&flowType=SMS&mobileNumber=${oldOrder?.mentor?.phone}&message=Hello ${oldOrder?.mentor?.fullName}, you have a new class booking on Homentor! 🎉 Parent: ${oldOrder?.parent?.phone}  Let’s deliver an impactful session.  - Team Homentor`;
-
-        // const response = await cashfree.PGFetchOrder(orderId)
-        // console.log('Order fetched successfully:', response.data);
     
         const response = await cashfree.PGOrderFetchPayments(orderId)
         // console.log(response)
@@ -86,19 +80,6 @@ router.get('/verify-order/:id', async (req, res) => {
             ).length > 0
         ) {
             oldOrder.status = "success"
-            // const response = await axios.post(url, null, {
-
-            //     headers: {
-            //         authToken: token,
-            //     },
-            // });
-            // const mentorResponse = await axios.post(mentorUrl, null, {
-
-            //     headers: {
-            //         authToken: token,
-            //     },
-            // });
-            // // console.log(response.data)
 
             const newBooking = new ClassBooking({
                 mentor: oldOrder.mentor._id,
