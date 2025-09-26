@@ -50,14 +50,22 @@ router.put("/booking/:id", async (req, res) => {
 });
 router.get("/mentor/:id", async (req, res) => {
   try {
-    console.log(req.params.id)
-    const booking = await ClassBooking.find({
-      mentor : new mongoose.Types.ObjectId(req.params.id)
-    }).populate("parent", "phone")
-    if (!booking)
-      return res.status(404).json({ success: false, message: "Not found" });
+    const { id } = req.params;
+    console.log("Mentor ID:", id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid mentor ID" });
+    }
+
+    const booking = await ClassBooking.find({ mentor: id }).populate("parent", "phone");
+
+    if (!booking || booking.length === 0) {
+      return res.status(404).json({ success: false, message: "No bookings found" });
+    }
+
     res.status(200).json({ success: true, data: booking });
   } catch (error) {
+    console.error("Error fetching bookings:", error); // log the actual error
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
