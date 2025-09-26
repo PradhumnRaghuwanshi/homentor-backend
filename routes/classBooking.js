@@ -4,16 +4,21 @@ const router = express.Router();
 const ClassBooking = require("../models/ClassBooking");
 const mongoose = require("mongoose");
 
-// @desc    Get all class bookings
-// @route   GET /api/class-bookings
+// Get all class bookings
 router.get("/", async (req, res) => {
   try {
-    const bookings = await ClassBooking.find().sort({ createdAt: -1 });
+    const bookings = await ClassBooking.find()
+      .populate("mentor", "fullName email phone") // populate only required fields
+      .populate("parent", "fullName phone")       // populate only required fields
+      .sort({ createdAt: -1 });
+
     res.status(200).json({ success: true, data: bookings });
   } catch (error) {
+    console.error("Error fetching bookings:", error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 
 // @desc    Create new class booking
 // @route   POST /api/class-bookings
