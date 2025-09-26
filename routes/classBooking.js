@@ -52,7 +52,7 @@ router.get("/mentor/:id", async (req, res) => {
   try {
     console.log(req.params.id)
     const booking = await ClassBooking.find({
-      mentor : mongoose.Types.ObjectId(req.params.id)
+      mentor : new mongoose.Types.ObjectId(req.params.id)
     }).populate("parent", "phone")
     if (!booking)
       return res.status(404).json({ success: false, message: "Not found" });
