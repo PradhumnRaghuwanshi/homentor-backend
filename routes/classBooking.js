@@ -19,9 +19,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-
-// @desc    Create new class booking
-// @route   POST /api/class-bookings
+// POST /api/class-bookings
 router.post("/", async (req, res) => {
   try {
     const newBooking = new ClassBooking(req.body);
@@ -87,6 +85,23 @@ router.get("/student/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
+// DELETE a booking by ID
+router.delete("/:id", async (req, res) => {
+  try {
+    const booking = await ClassBooking.findByIdAndDelete(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Booking deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting booking:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
 
 
 module.exports = router;
