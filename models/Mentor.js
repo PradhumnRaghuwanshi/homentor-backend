@@ -58,7 +58,15 @@ const MentorSchema = new mongoose.Schema({
     type: String,
     default: "3 km",
   },
-  teachingModes: Object,
+  // teachingModes: Object,
+   teachingModes: {
+    homeTuition: {
+      selected: { type: Boolean, default: false },
+      monthlyPrice: { type: Number }, // mentor’s entered fee
+      margin: { type: Number, default: 0 },           // system-calculated margin
+      finalPrice: { type: Number, default: 0 }        // monthlyPrice + margin
+    }
+  },
   teachingPreferences: Object,
   availableDays: {
     type: [String],
