@@ -94,6 +94,11 @@ const MentorSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  demoType: {
+  type: String,
+  enum: ["free", "paid", "none"], // free => Free demo, paid => 99rs demo, none => hide both
+  default: "free"
+}
 });
 
 module.exports = mongoose.model("Mentor", MentorSchema);
