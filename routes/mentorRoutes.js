@@ -11,6 +11,24 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+// Update all mentors demoType at once
+router.put("/demoType/:type", async (req, res) => {
+  try {
+    const { type } = req.params;
+
+    if (!["free", "paid", "none"].includes(type)) {
+      return res.status(400).json({ message: "Invalid demoType" });
+    }
+
+    await Mentor.updateMany({}, { demoType: type });
+
+    res.json({ message: `All mentors updated to demoType: ${type}` });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 router.post("/login-check", async (req, res) => {
   try {
     console.log( req.body.phone)
