@@ -108,7 +108,10 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const mentor = new Mentor(req.body);
-    console.log(mentor)
+    // Inside mentor signup controller
+   mentor.teachingModes.homeTuition.margin = mentor.teachingModes.homeTuition.monthlyPrice <= 5000 ? 500 : 1000;
+
+   mentor.teachingModes.homeTuition.finalPrice = mentor.teachingModes.homeTuition.monthlyPrice + mentor.teachingModes.homeTuition.margin;
     const newMentor = await mentor.save();
     res.status(201).json({ data: newMentor });
   } catch (error) {
