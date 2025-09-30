@@ -20,7 +20,7 @@ const bookingSchema = new mongoose.Schema(
     },
     subject: {
       type: String,
-      
+
     },
     status: {
       type: String,
@@ -35,8 +35,14 @@ const bookingSchema = new mongoose.Schema(
     notes: {
       type: String,
     },
-    amount : {
-        type : Number
+    amount: {
+      type: Number
+    },
+    address: {
+      street: { type: String },
+      city: { type: String },
+      state: { type: String },
+      pincode: { type: String },
     }
   },
   { timestamps: true }
