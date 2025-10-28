@@ -4,15 +4,6 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  try {
-    const newBooking = new ClassBooking(req.body);
-    const savedBooking = await newBooking.save();
-    res.status(201).json({ success: true, data: savedBooking });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
 
 // ✅ Create demo booking
 router.post("/", async (req, res) => {
@@ -33,7 +24,7 @@ router.post("/", async (req, res) => {
     })
 
     if (!parent){
-      parent = User.create({
+      parent = await User.create({
         phone : parentPhone
       })
     }
