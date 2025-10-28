@@ -32,7 +32,8 @@ router.post("/", async (req, res) => {
     const newBooking = new ClassBooking({
       mentor: mentorId,
       price: 0,
-      parent: parent._id
+      parent: parent._id,
+      duration : 2
     })
     await newBooking.save()
 
