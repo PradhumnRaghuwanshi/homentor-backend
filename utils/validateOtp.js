@@ -4,7 +4,7 @@ const User = require("../models/User");
 
 const validateOtp = async (verificationId, code, phone) => {
   const token =
-    "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLTMzNDkwN0Q2RUEzNzQ4RCIsImlhdCI6MTc1NTQzMjUxMSwiZXhwIjoxOTEzMTEyNTExfQ.1ey_DQZHtosXDMzTd2yt_gOoBkaSE8lMV4-gb3ZnGa4V-_qSpoZsa6HmGODwU_2fzCNcuX9ziBOyEEYU_bXsEg";
+    "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLUU0NjQyMThGMjYwMTQ2QSIsImlhdCI6MTc2MjYyNTM3MywiZXhwIjoxOTIwMzA1MzczfQ.6XQqj-ji5vkHQAADUx0b9LrIsuGLkpOS3Lkjr7kox-406p2YU9JXtwYuA7AJY7WmQjB5kHPh7vhpT4Nro9bUHw";
 
   const url = "https://cpaas.messagecentral.com/verification/v3/validateOtp";
   const params = {
