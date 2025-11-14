@@ -8,9 +8,12 @@ const router = express.Router();
 // ✅ Create demo booking
 router.post("/", async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
+
     const { mentorId, parentPhone, studentName, address, fee } = req.body;
-    const booking = new DemoBooking({
+
+    // Save demo booking
+    const booking = await DemoBooking.create({
       mentor: mentorId,
       parentPhone,
       studentName,
@@ -18,31 +21,36 @@ router.post("/", async (req, res) => {
       fee,
     });
 
-    await booking.save();
+    // Find or create parent
+    let parent = await User.findOne({ phone: parentPhone });
 
-    let parent = await User.findOne({
-      phone : parentPhone
-    })
-
-    if (!parent){
-      parent = await User.create({
-        phone : parentPhone
-      })
+    if (!parent) {
+      parent = await User.create({ phone: parentPhone });
     }
 
-    const newBooking = new ClassBooking({
+    // Create main class booking
+    const newBooking = await ClassBooking.create({
       mentor: mentorId,
       price: 0,
       parent: parent._id,
-      duration : 2
-    })
-    await newBooking.save()
+      duration: 2,
+    });
 
-    res.status(201).json({ success: true, data: booking });
+    res.status(201).json({
+      success: true,
+      message: "Booking created successfully",
+      data: {
+        demoBooking: booking,
+        classBooking: newBooking,
+      },
+    });
+
   } catch (error) {
+    console.error("Booking error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 // ✅ Get all demo bookings (for admin)
 router.get("/", async (req, res) => {
