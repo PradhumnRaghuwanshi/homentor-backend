@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
 
     await booking.save();
 
-    const parent = await User.findOne({
+    let parent = await User.findOne({
       phone : parentPhone
     })
 
