@@ -1,6 +1,7 @@
 const express = require("express");
 const DemoBooking = require("../models/DemoBooking");
 const User = require("../models/User");
+const ClassBooking = require("../models/ClassBooking");
 
 const router = express.Router();
 
