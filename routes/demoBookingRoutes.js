@@ -8,6 +8,7 @@ const router = express.Router();
 // ✅ Create demo booking
 router.post("/", async (req, res) => {
   try {
+    console.log(req.body)
     const { mentorId, parentPhone, studentName, address, fee } = req.body;
     const booking = new DemoBooking({
       mentor: mentorId,
