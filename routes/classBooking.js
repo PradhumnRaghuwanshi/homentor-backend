@@ -121,6 +121,26 @@ router.post("/:id/parent-complete", async (req, res) => {
     const booking = await ClassBooking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Not found" });
 
+    // ✅ All classes finished → allow parent confirmation
+    booking.parentCompletion = !booking.parentCompletion;
+    await booking.save();
+
+    res.json({
+      success: true,
+      message: "Parent confirmation saved successfully",
+      data: booking,
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post("/:id/mentor-complete", async (req, res) => {
+  try {
+    const booking = await ClassBooking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Not found" });
+
     // Check if classes completed
     const totalClasses = Number(booking.duration);  // usually 22
     const completed = booking.progress;
@@ -135,12 +155,12 @@ router.post("/:id/parent-complete", async (req, res) => {
     }
 
     // ✅ All classes finished → allow parent confirmation
-    booking.parentCompletion = !booking.parentCompletion;
+    booking.mentorCompletion = !booking.mentorCompletion;
     await booking.save();
 
     res.json({
       success: true,
-      message: "Parent confirmation saved successfully",
+      message: "Mentor confirmation saved successfully",
       data: booking,
     });
 
