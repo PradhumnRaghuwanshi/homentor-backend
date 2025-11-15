@@ -116,4 +116,39 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.post("/:id/parent-complete", async (req, res) => {
+  try {
+    const booking = await ClassBooking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Not found" });
+
+    // Check if classes completed
+    const totalClasses = Number(booking.duration);  // usually 22
+    const completed = booking.progress;
+    const remaining = totalClasses - completed;
+
+    // ❌ If classes are not fully completed
+    if (remaining > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `${remaining} classes are remaining`,
+      });
+    }
+
+    // ✅ All classes finished → allow parent confirmation
+    booking.parentCompletion = true;
+    await booking.save();
+
+    res.json({
+      success: true,
+      message: "Parent confirmation saved successfully",
+      data: booking,
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
 module.exports = router;
