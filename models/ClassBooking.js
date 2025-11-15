@@ -15,7 +15,7 @@ const classBookingSchema = new mongoose.Schema({
   subject: { type: String },
   status: {
     type: String,
-    enum: ["pending_schedule", "scheduled", "completed", "cancelled"],
+    enum: ["pending_schedule", "scheduled", "running" , "completed", "cancelled"],
     default: "pending_schedule",
   },
   bookedDate: { type: Date, required: true, default: Date.now },

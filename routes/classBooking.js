@@ -9,7 +9,7 @@ const User = require("../models/User");
 router.get("/", async (req, res) => {
   try {
     const bookings = await ClassBooking.find()
-      .populate("mentor", "fullName email phone") // populate only required fields
+      .populate("mentor", "fullName email phone teachingModes") // populate only required fields
       .populate("parent", "fullName phone")       // populate only required fields
       .sort({ createdAt: -1 });
 
