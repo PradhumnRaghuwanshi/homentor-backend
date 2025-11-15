@@ -34,7 +34,9 @@ app.use('/api/mentor',mentorRoutes)
 app.use("/api/chat", chatRoutes);
 app.use("/api/payment", require("./routes/cashfreePayment.js"));
 app.use("/api/order", require("./routes/orderRoutes.js"));
+app.use("/api/margin-rule", require("./routes/marginRule.js"));
 app.use("/api/demo-booking", require("./routes/demoBookingRoutes.js"));
+
 
 
 
