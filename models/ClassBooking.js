@@ -47,6 +47,11 @@ const classBookingSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  
+  adminApproved: {
+    type: Boolean,
+    default: false
+  },
 
   parentCompletion: {
     type: Boolean,
