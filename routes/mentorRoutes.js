@@ -109,7 +109,7 @@ router.post("/batch", async (req, res) => {
 
     const mentors = await Mentor.find({
       _id: { $in: mentorIds }
-    }).select("fullName phone profilePhoto");
+    }).select("fullName phone profilePhoto teachingModes phone");
 
     res.json({ success: true, mentors });
   } catch (err) {
