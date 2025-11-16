@@ -17,6 +17,7 @@ const OrderSchema = new mongoose.Schema({
   userPhone: String,
   status: { type: String, default: "PENDING" }, // PENDING, PAID, FAILED
   verifiedAt: Date,
+  duration : {type: Number, default: null}
 });
 
 module.exports = mongoose.model("Order", OrderSchema);
