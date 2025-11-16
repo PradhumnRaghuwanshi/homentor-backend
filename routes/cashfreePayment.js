@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/create-order", async (req, res) => {
     try {
-        const { amount, customerId, customerPhone, mentorId, duration } = req.body;
+        const { amount, customerId, customerPhone, mentorId, duration, session } = req.body;
         // console.log("MentorId ", mentorId)
         const user = await User.findOne({
             phone: customerPhone
@@ -47,7 +47,8 @@ router.post("/create-order", async (req, res) => {
             userPhone: customerPhone,
             status: "PENDING", // Initial status
             mentor: mentorId,
-            duration: duration ? duration : null 
+            duration: duration ? duration : null ,
+            session : session ? session : 1
         });
         res.status(200).json(response.data);
     } catch (error) {
@@ -86,7 +87,8 @@ router.get('/verify-order/:id', async (req, res) => {
                 mentor: oldOrder.mentor._id,
                 price: oldOrder.amount,
                 parent: oldOrder.parent._id,
-                duration: oldOrder.duration ? oldOrder.duration : 22
+                duration: oldOrder.duration ? oldOrder.duration : 22,
+                session : oldOrder.session
             })
             await newBooking.save()
         }
