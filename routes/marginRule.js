@@ -29,30 +29,41 @@ router.post("/apply-margins", async (req, res) => {
     const rules = await MarginRule.find();
     const mentors = await Mentor.find();
 
-    for (let mentor of mentors) {
-      const modes = mentor.teachingModes || {};
+    if (!rules.length) {
+      return res.status(400).json({ message: "No margin rules found" });
+    }
 
-      for (let key in modes) {
-        const price = modes[key].monthlyPrice;
+    for (const mentor of mentors) {
+      const ht = mentor.teachingModes?.homeTuition;
 
-        if (!price) continue;
+      // If no homeTuition mode or no monthlyPrice → skip
+      if (!ht || typeof ht.monthlyPrice !== "number") continue;
 
-        // find matching rule
-        const rule = rules.find(r => price >= r.min && price <= r.max);
+      const price = ht.monthlyPrice;
 
-        if (rule) {
-          modes[key].margin = rule.margin;
-          modes[key].finalPrice = price + rule.margin;
-        }
-      }
+      // Find matching rule
+      const rule = rules.find(
+        (r) => price >= r.min && price <= r.max
+      );
 
+      // If no rule matches → skip
+      if (!rule) continue;
+
+      // Apply margin & final price
+      ht.margin = rule.margin;
+      ht.finalPrice = price + rule.margin;
+
+      mentor.teachingModes.homeTuition = ht;
       await mentor.save();
     }
 
     res.json({ success: true, message: "Margins applied successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+
+  } catch (err) {
+    console.error("Margin apply error:", err);
+    res.status(500).json({ message: "Server Error", error: err.message });
   }
 });
+
 
 module.exports = router;
