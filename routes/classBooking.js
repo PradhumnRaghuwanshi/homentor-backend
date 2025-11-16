@@ -169,6 +169,38 @@ router.post("/:id/mentor-complete", async (req, res) => {
   }
 });
 
+// POST /api/class-bookings/:id/terminate
+router.post("/:id/terminate", async (req, res) => {
+  try {
+    const booking = await ClassBooking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const totalClasses = Number(booking.duration) || 22;
+    const completed = booking.progress || 0;
+
+    const perClassPrice = booking.price / totalClasses;
+    const refundAmount = Math.max((totalClasses - completed) * perClassPrice, 0);
+
+    booking.status = "terminated";
+    booking.refundAmount = refundAmount;
+    booking.terminatedAt = new Date();
+
+    await booking.save();
+
+    res.json({
+      success: true,
+      refundAmount,
+      message: "Teacher terminated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 
 
 module.exports = router;

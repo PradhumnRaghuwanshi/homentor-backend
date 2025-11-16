@@ -15,7 +15,7 @@ const classBookingSchema = new mongoose.Schema({
   subject: { type: String },
   status: {
     type: String,
-    enum: ["pending_schedule", "scheduled", "running" , "completed", "cancelled"],
+    enum: ["pending_schedule", "scheduled", "running" , "completed", "cancelled", "terminated"],
     default: "pending_schedule",
   },
   bookedDate: { type: Date, required: true, default: Date.now },
@@ -37,7 +37,8 @@ const classBookingSchema = new mongoose.Schema({
     type: Number,
     default: 0   // number of completed lectures
   },
-
+  refundAmount: {type: Number, default: 0},
+  terminatedAt: {type : Date},
   isCompleted: {
     type: Boolean,
     default: false
