@@ -103,6 +103,20 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.post("/batch", async (req, res) => {
+  try {
+    const mentorIds = req.body.ids;   // receives ["id1", "id2", "id3"]
+
+    const mentors = await Mentor.find({
+      _id: { $in: mentorIds }
+    }).select("fullName phone profilePhoto");
+
+    res.json({ success: true, mentors });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // POST new mentor
 router.post("/", async (req, res) => {
