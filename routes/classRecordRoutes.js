@@ -39,27 +39,28 @@ router.post("/", async (req, res) => {
     await classRecord.save();
 
     // 2️⃣ Fetch ClassBooking
-    let classBooking = await ClassBooking.findOne({ _id: classRecord.classBooking });
+    let classBooking = await ClassBooking.findOne({
+      _id: classRecord.classBooking
+    });
 
     if (!classBooking) {
       return res.status(404).json({ message: "Class Booking not found" });
     }
 
-    // Ensure totalProgressMinutes field exists
-    if (!classBooking.totalProgressMinutes) {
-      classBooking.totalProgressMinutes = 0;
+    // Ensure progress exists (old bookings may have null or undefined)
+    if (!classBooking.progress) {
+      classBooking.progress = 0;
     }
 
     // 3️⃣ Convert duration "H:MM" → total minutes
-    const durationStr = req.body.duration; // example "1:10"
+    const durationStr = req.body.duration;   // example "1:10"
     let [hours, minutes] = durationStr.split(":").map(Number);
-
     const totalMinutes = hours * 60 + minutes;
 
-    // 4️⃣ Add this duration to total progress
+    // 4️⃣ Add the minutes to progress
     classBooking.progress += totalMinutes;
 
-    // 5️⃣ Push record ID inside booking
+    // 5️⃣ Push class record
     classBooking.classesRecord.push(classRecord._id);
 
     // 6️⃣ Save booking
@@ -72,6 +73,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: error.message || "Something went wrong" });
   }
 });
+
 
 
 module.exports = router
