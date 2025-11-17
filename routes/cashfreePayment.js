@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/create-order", async (req, res) => {
     try {
-        const { amount, customerId, customerPhone, mentorId, duration, session } = req.body;
+        const { amount, customerId, customerPhone, mentorId, duration, session, isDemo, classBookingId } = req.body;
         // console.log("MentorId ", mentorId)
         const user = await User.findOne({
             phone: customerPhone
@@ -38,8 +38,6 @@ router.post("/create-order", async (req, res) => {
         );
         const order = response.data;
 
-        // console.log(response.data)
-
         await Order.create({
             orderId: order.order_id,
             parent: user._id,
@@ -48,7 +46,9 @@ router.post("/create-order", async (req, res) => {
             status: "PENDING", // Initial status
             mentor: mentorId,
             duration: duration ? duration : null ,
-            session : session ? session : 1
+            session : session ? session : 1,
+            isDemo : isDemo,
+            classBookig : classBookingId
         });
         res.status(200).json(response.data);
     } catch (error) {
@@ -71,8 +71,6 @@ router.get('/verify-order/:id', async (req, res) => {
         }).populate("mentor", "fullName phone").populate("parent", "phone");
     
         const response = await cashfree.PGOrderFetchPayments(orderId)
-        // console.log(response)
-        // cashfree.PG
 
         console.log('Order fetched successfully 2:', response.data);
         const getOrderResponse = response.data;
@@ -83,6 +81,16 @@ router.get('/verify-order/:id', async (req, res) => {
         ) {
             oldOrder.status = "success"
 
+            if(oldOrder.isDemo){
+                let oldBooking = await ClassBooking.findOne({
+                    _id : oldOrder.classBookig
+                })
+                oldBooking.isDemo = false
+                oldBooking.duration = oldOrder?.duration
+                oldBooking.price = oldOrder.amount
+                oldBooking.save()
+            } else {
+        
             const newBooking = new ClassBooking({
                 mentor: oldOrder.mentor._id,
                 price: oldOrder.amount,
@@ -90,7 +98,9 @@ router.get('/verify-order/:id', async (req, res) => {
                 duration: oldOrder.duration ? oldOrder.duration : 22,
                 session : oldOrder.session
             })
-            await newBooking.save()
+             await newBooking.save()
+        }
+           
         }
         else if (
             getOrderResponse.filter(

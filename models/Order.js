@@ -17,7 +17,12 @@ const OrderSchema = new mongoose.Schema({
   userPhone: String,
   status: { type: String, default: "PENDING" }, // PENDING, PAID, FAILED
   verifiedAt: Date,
-  duration : {type: Number, default: null}
+  duration : {type: Number, default: null},
+  classBookig : {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "classBooking"
+  },
+  isDemo: {type : Boolean, default: false}
 });
 
 module.exports = mongoose.model("Order", OrderSchema);
