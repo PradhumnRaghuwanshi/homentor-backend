@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ClassRecord = require("../models/ClassRecord");
+const ClassBooking = require("../models/ClassBooking");
 
 // GET all classRecords
 router.get("/", async (req, res) => {
@@ -34,6 +35,13 @@ router.post("/", async (req, res) => {
     console.log(req.body);
     const classRecord = new ClassRecord(req.body);
     await classRecord.save();
+
+    let classBooking = await ClassBooking.findOne({_id : classRecord.classBooking})
+    console.log(classBooking)
+    classBooking.progress = classBooking.progress + 1
+    classBooking.classesRecord.push(classRecord._id)
+    await classBooking.save()
+    
     res.status(200).json({ data: classRecord });
   } catch (error) {
     console.error("Error saving class record:", error);
