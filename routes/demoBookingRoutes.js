@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
       parentPhone,
       studentName,
       address,
-      fee,
+      fee
     });
 
     // Find or create parent
@@ -35,6 +35,7 @@ router.post("/", async (req, res) => {
       price: 0,
       parent: parent._id,
       duration: 2,
+      isDemo : true
     });
 
     res.status(201).json({

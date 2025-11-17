@@ -43,7 +43,8 @@ const bookingSchema = new mongoose.Schema(
       city: { type: String },
       state: { type: String },
       pincode: { type: String },
-    }
+    },
+    
   },
   { timestamps: true }
 );

@@ -60,7 +60,7 @@ const classBookingSchema = new mongoose.Schema({
   },
   session: {type: Number, default: 1},
   feedback: { type: String },
-
+  isDemo : {type : Boolean, default : false}
 
 });
 
