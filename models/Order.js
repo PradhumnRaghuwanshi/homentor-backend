@@ -22,7 +22,8 @@ const OrderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "classBooking"
   },
-  isDemo: {type : Boolean, default: false}
+  isDemo: {type : Boolean, default: false},
+  session : {type : Number}
 });
 
 module.exports = mongoose.model("Order", OrderSchema);

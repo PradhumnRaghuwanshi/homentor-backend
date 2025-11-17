@@ -96,7 +96,7 @@ router.get('/verify-order/:id', async (req, res) => {
                 price: oldOrder.amount,
                 parent: oldOrder.parent._id,
                 duration: oldOrder.duration ? oldOrder.duration : 22,
-                session : oldOrder.session
+                session : oldOrder?.session
             })
              await newBooking.save()
         }
