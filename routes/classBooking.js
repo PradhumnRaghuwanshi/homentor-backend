@@ -159,7 +159,7 @@ router.post("/:id/mentor-complete", async (req, res) => {
     // ✅ All classes finished → allow parent confirmation
     booking.mentorCompletion = !booking.mentorCompletion;
     if(booking.demoStatus == "running"){
-      booking.demoStatus == "completed"
+      booking.demoStatus = "completed"
     }
 
     await booking.save();
