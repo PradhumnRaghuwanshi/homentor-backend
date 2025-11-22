@@ -45,10 +45,10 @@ router.post("/create-order", async (req, res) => {
             userPhone: customerPhone,
             status: "PENDING", // Initial status
             mentor: mentorId,
-            duration: duration ? duration : null ,
-            session : session ? session : 1,
-            isDemo : isDemo,
-            classBookig : classBookingId
+            duration: duration ? duration : null,
+            session: session ? session : 1,
+            isDemo: isDemo,
+            classBookig: classBookingId
         });
         res.status(200).json(response.data);
     } catch (error) {
@@ -65,11 +65,11 @@ const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLThDODE3M0UzMDM4QTQ4NCIsImlhdCI6
 router.get('/verify-order/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
-        
+
         const oldOrder = await Order.findOne({
             orderId: orderId
         }).populate("mentor", "fullName phone").populate("parent", "phone");
-    
+
         const response = await cashfree.PGOrderFetchPayments(orderId)
 
         console.log('Order fetched successfully 2:', response.data);
@@ -81,26 +81,42 @@ router.get('/verify-order/:id', async (req, res) => {
         ) {
             oldOrder.status = "success"
 
-            if(oldOrder.isDemo){
+            if (oldOrder.isDemo) {
                 let oldBooking = await ClassBooking.findOne({
-                    _id : oldOrder.classBookig
+                    _id: oldOrder.classBookig
                 })
-                oldBooking.isDemo = false
-                oldBooking.duration = oldOrder?.duration
-                oldBooking.price = oldOrder.amount
-                oldBooking.save()
+
+                let newBooking = new ClassBooking({
+                    mentor: oldOrder.mentor._id,
+                    price: oldOrder.amount,
+                    parent: oldOrder.parent._id,
+                    duration: oldOrder.duration ? oldOrder.duration : 22,
+                    session: oldOrder?.session
+                })
+
+                newBooking.isDemo = false
+                newBooking.status = "scheduled"
+                newBooking.class = oldBooking.class
+                newBooking.studentName = oldBooking.studentName
+                newBooking.school = oldBooking.school
+                newBooking.scheduledTime = oldBooking.scheduledTime
+                newBooking.scheduledDate = oldBooking.scheduledDate
+                newBooking.subject = oldBooking.subject
+
+
+                newBooking.save()
             } else {
-        
-            const newBooking = new ClassBooking({
-                mentor: oldOrder.mentor._id,
-                price: oldOrder.amount,
-                parent: oldOrder.parent._id,
-                duration: oldOrder.duration ? oldOrder.duration : 22,
-                session : oldOrder?.session
-            })
-             await newBooking.save()
-        }
-           
+
+                const newBooking = new ClassBooking({
+                    mentor: oldOrder.mentor._id,
+                    price: oldOrder.amount,
+                    parent: oldOrder.parent._id,
+                    duration: oldOrder.duration ? oldOrder.duration : 22,
+                    session: oldOrder?.session
+                })
+                await newBooking.save()
+            }
+
         }
         else if (
             getOrderResponse.filter(
