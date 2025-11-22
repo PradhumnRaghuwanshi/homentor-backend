@@ -60,7 +60,8 @@ const classBookingSchema = new mongoose.Schema({
   },
   session: {type: Number, default: 1},
   feedback: { type: String },
-  isDemo : {type : Boolean, default : false}
+  isDemo : {type : Boolean, default : false},
+  demoStatus : {type: String, default: "not-demo"}
 
 });
 

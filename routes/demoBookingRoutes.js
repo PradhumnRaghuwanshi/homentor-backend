@@ -35,7 +35,8 @@ router.post("/", async (req, res) => {
       price: 0,
       parent: parent._id,
       duration: 2,
-      isDemo : true
+      isDemo : true,
+      demoStatus : "running"
     });
 
     res.status(201).json({
