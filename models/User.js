@@ -4,7 +4,9 @@ const userSchema = new mongoose.Schema({
   phone: Number,
   address : {
     type: Object
-  }
+  },
+  fcmToken: { type: String }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

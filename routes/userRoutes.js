@@ -4,6 +4,15 @@ const User = require("../models/User");
 const Room = require("../models/Room");
 const sendOtp = require("../utils/sendOtp");
 
+
+router.post("/save-fcm-token", async (req, res) => {
+  const { userId, token } = req.body;
+
+  await User.findByIdAndUpdate(userId, { fcmToken: token });
+
+  res.json({ success: true });
+});
+
 // GET all users
 router.get("/", async (req, res) => {
   try {
