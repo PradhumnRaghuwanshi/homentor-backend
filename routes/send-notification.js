@@ -1,4 +1,6 @@
 const admin = require("../firebase");
+const express = require("express")
+const router = express.Router()
 
 router.post("/send-notification", async (req, res) => {
   try {
@@ -21,3 +23,5 @@ router.post("/send-notification", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+module.exports = router
