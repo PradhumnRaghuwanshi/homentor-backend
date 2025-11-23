@@ -186,6 +186,26 @@ router.post("/:id/parent-complete", async (req, res) => {
   }
 });
 
+router.post("/:id/admin-approve", async (req, res) => {
+  try {
+    const booking = await ClassBooking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Not found" });
+
+    // ✅ All classes finished → allow parent confirmation
+    booking.adminApproved = !booking.adminApproved;
+    await booking.save();
+
+    res.json({
+      success: true,
+      message: "Admin Approved saved successfully",
+      data: booking,
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.post("/:id/mentor-complete", async (req, res) => {
   try {
     const booking = await ClassBooking.findById(req.params.id);
