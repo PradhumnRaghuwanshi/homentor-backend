@@ -31,14 +31,64 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/cash-booking", async (req, res) => {
+router.post("/manual-booking", async (req, res) => {
   try {
-    
-    const newBooking = new ClassBooking(req.body);
+    const { phone, address, ...bookingData } = req.body;
+
+    // 1️⃣ Check if user already exists
+    let user = await User.findOne({ phone});
+
+    // 2️⃣ If user does NOT exist, create it
+    if (!user) {
+      user = new User({
+        phone,
+        address: {
+          street: address.street,
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode
+        },
+      });
+      await user.save();
+
+    } else {
+      // 3️⃣ If user exists, update address
+      user.address = {
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode
+      };
+      await user.save();
+    }
+
+    // 4️⃣ Create booking linked to user
+    const newBooking = new ClassBooking({
+      ...bookingData,
+      parent: user._id, // LINK booking to user
+      mentor: req.body.mentorId,
+      status : "scheduled",
+      duration : req.body.duration,
+      price : req.body.amount,
+      session : 1,
+      class : req.body.className,
+      scheduledTime : req.body.time,
+      scheduledDate : req.body.date
+    });
+
     const savedBooking = await newBooking.save();
-    res.status(201).json({ success: true, data: savedBooking });
+
+    // 5️⃣ Send success response
+    res.status(201).json({
+      success: true,
+      message: "Booking done successfully",
+      booking: savedBooking,
+      parent: user,
+    });
+
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error("Booking error:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
