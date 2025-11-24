@@ -3,7 +3,7 @@ const router = express.Router();
 const Mentor = require("../models/Mentor");
 
 router.get("/nearby-mentors", async (req, res) => {
-  const { lat, lon } = req.query;
+  const { lat, lon, subject, classLevel, rank } = req.query;
 
   const adminLat = Number(lat);
   const adminLon = Number(lon);
@@ -14,15 +14,12 @@ router.get("/nearby-mentors", async (req, res) => {
   function normalizeRange(range) {
     if (!range) return Infinity;
 
-    range = range.toLowerCase();
+    const str = range.toLowerCase();
 
-    if (range === "anywhere") return Infinity;
+    if (str === "anywhere") return Infinity;
+    if (str.endsWith("+")) return parseInt(str);
 
-    if (range.endsWith("+")) {
-      return parseInt(range); // "25km+" -> 25
-    }
-
-    return parseInt(range); // "5km" -> 5
+    return parseInt(str);
   }
 
   // Haversine distance calculator
@@ -42,41 +39,70 @@ router.get("/nearby-mentors", async (req, res) => {
     return R * c; // km
   }
 
-  let enriched = mentors.map(m => {
-    const distance = getDistance(adminLat, adminLon, m.location.lat, m.location.lon);
+  let enriched = mentors.map((m) => {
+    const distance = getDistance(
+      adminLat,
+      adminLon,
+      m.location?.lat,
+      m.location?.lon
+    );
 
     const numericRange = normalizeRange(m.teachingRange);
 
     const isInRange = distance <= numericRange;
+
+    // SUBJECT FILTER
+    const matchSubject = subject
+      ? m.subjects?.map((s) => s.toLowerCase()).includes(subject.toLowerCase())
+      : true;
+
+    // CLASS FILTER
+    const matchClass = classLevel
+      ? m.classes?.includes(String(classLevel))
+      : true;
+
+    // RANK FILTER
+    const matchRank = rank ? Number(m.adminRanking) === Number(rank) : true;
+
+    const strongMatch = matchSubject && matchClass && matchRank;
 
     return {
       ...m._doc,
       distance,
       convertedRange: numericRange,
       isInRange,
+      matchSubject,
+      matchClass,
+      matchRank,
+      strongMatch,
     };
   });
 
-  // Sorting logic:
-  // 1. In-range mentors first
-  // 2. Then by nearest distance
-  // 3. Then available ones above unavailable
+  // 🔥 Final sorting priority:
+  // 1️⃣ Strong matches (subject/class/rank all true)
+  // 2️⃣ In teaching range
+  // 3️⃣ Available mentors
+  // 4️⃣ Nearest distance
   enriched.sort((a, b) => {
+    // STRONG FILTER MATCH FIRST
+    if (a.strongMatch && !b.strongMatch) return -1;
+    if (!a.strongMatch && b.strongMatch) return 1;
 
-    // 1️⃣ In-range priority
+    // In-range priority
     if (a.isInRange && !b.isInRange) return -1;
     if (!a.isInRange && b.isInRange) return 1;
 
-    // 2️⃣ Available mentors first
+    // Available mentors first
     if (a.isAvailable && !b.isAvailable) return -1;
     if (!a.isAvailable && b.isAvailable) return 1;
 
-    // 3️⃣ Finally, nearest first
+    // Nearest first
     return a.distance - b.distance;
   });
 
   res.json(enriched);
 });
+
 
 
 
