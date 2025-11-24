@@ -59,7 +59,7 @@ const MentorSchema = new mongoose.Schema({
     default: "3 km",
   },
   // teachingModes: Object,
-   teachingModes: {
+  teachingModes: {
     homeTuition: {
       selected: { type: Boolean, default: false },
       monthlyPrice: { type: Number }, // mentor’s entered fee
@@ -103,14 +103,22 @@ const MentorSchema = new mongoose.Schema({
     default: false,
   },
   demoType: {
-  type: String,
-  enum: ["free", "paid", "none"], // free => Free demo, paid => 99rs demo, none => hide both
-  default: "free"
-},
-backupTeachers: {type: Array},
- callRouting: {
+    type: String,
+    enum: ["free", "paid", "none"], // free => Free demo, paid => 99rs demo, none => hide both
+    default: "free"
+  },
+  backupTeachers: { type: Array },
+  callRouting: {
     mode: { type: String, enum: ["mentor", "company"], default: "company" }
-  }
+  },
+  // ⭐ Add this block
+  coordinates: {
+    type: { type: String, default: "Point" },
+    coordinates: { type: [Number],index: "2dsphere", default: [0, 0] },
+  },
 });
+
+MentorSchema.index({ coordinates: "2dsphere" });
+
 
 module.exports = mongoose.model("Mentor", MentorSchema);

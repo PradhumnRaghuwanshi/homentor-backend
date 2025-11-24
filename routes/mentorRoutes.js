@@ -2,6 +2,46 @@ const express = require("express");
 const router = express.Router();
 const Mentor = require("../models/Mentor");
 
+router.get("/nearby-mentors", async (req, res) => {
+  const { lat, lon } = req.query;
+  const adminLat = Number(lat);
+  const adminLon = Number(lon);
+
+  const mentors = await Mentor.find();
+
+  // Haversine distance calculation
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  }
+
+  let sorted = mentors
+    .map(m => ({
+      ...m._doc,
+      distance: getDistance(adminLat, adminLon, m.location.lat, m.location.lon)
+    }))
+    .sort((a, b) => {
+      // first available → nearest
+      if (a.isAvailable && !b.isAvailable) return -1;
+      if (!a.isAvailable && b.isAvailable) return 1;
+      return a.distance - b.distance;
+    });
+
+  res.json(sorted);
+});
+
+
 // GET all mentors
 router.get("/", async (req, res) => {
   try {
@@ -31,9 +71,9 @@ router.put("/demoType/:type", async (req, res) => {
 
 router.post("/login-check", async (req, res) => {
   try {
-    console.log( req.body.phone)
-    const mentor = await Mentor.findOne({phone : req.body.phone})
-    if (!mentor){
+    console.log(req.body.phone)
+    const mentor = await Mentor.findOne({ phone: req.body.phone })
+    if (!mentor) {
       res.status(404).json({ message: "Mentor not found" });
     }
     res.status(200).json({ data: mentor });
@@ -60,35 +100,35 @@ router.get('/selected-mentors', async (req, res) => {
   }
 });
 
-router.get('/pending-mentors', async(req, res)=>{
+router.get('/pending-mentors', async (req, res) => {
   const pendingMentors = await Mentor.find({
-    status : "Pending"
+    status: "Pending"
   })
-  res.status(200).json({data: pendingMentors})
+  res.status(200).json({ data: pendingMentors })
 })
 
-router.get('/approved-mentors', async(req, res)=>{
+router.get('/approved-mentors', async (req, res) => {
   const pendingMentors = await Mentor.find({
-    status : "Approved"
+    status: "Approved"
   })
-  res.status(200).json({data: pendingMentors})
+  res.status(200).json({ data: pendingMentors })
 })
 
-router.get('/visible-mentors', async(req, res)=>{
+router.get('/visible-mentors', async (req, res) => {
   const visibleMentors = await Mentor.find({
-    status : "Approved",
-    showOnWebsite : true
+    status: "Approved",
+    showOnWebsite: true
   })
-  res.status(200).json({data: visibleMentors})
+  res.status(200).json({ data: visibleMentors })
 })
 
-router.get('/gold-mentor', async(req, res)=>{
+router.get('/gold-mentor', async (req, res) => {
   const goldMentors = await Mentor.find({
-    status : "Approved",
-    showOnWebsite : true,
-    inHouse : true
+    status: "Approved",
+    showOnWebsite: true,
+    inHouse: true
   })
-  res.status(200).json({data: goldMentors})
+  res.status(200).json({ data: goldMentors })
 })
 
 // GET mentor by ID
@@ -123,9 +163,9 @@ router.post("/", async (req, res) => {
   try {
     const mentor = new Mentor(req.body);
     // Inside mentor signup controller
-   mentor.teachingModes.homeTuition.margin = mentor.teachingModes.homeTuition.monthlyPrice <= 5000 ? 500 : 1000;
+    mentor.teachingModes.homeTuition.margin = mentor.teachingModes.homeTuition.monthlyPrice <= 5000 ? 500 : 1000;
 
-   mentor.teachingModes.homeTuition.finalPrice = mentor.teachingModes.homeTuition.monthlyPrice + mentor.teachingModes.homeTuition.margin;
+    mentor.teachingModes.homeTuition.finalPrice = mentor.teachingModes.homeTuition.monthlyPrice + mentor.teachingModes.homeTuition.margin;
     const newMentor = await mentor.save();
     res.status(201).json({ data: newMentor });
   } catch (error) {
