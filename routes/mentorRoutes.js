@@ -4,12 +4,28 @@ const Mentor = require("../models/Mentor");
 
 router.get("/nearby-mentors", async (req, res) => {
   const { lat, lon } = req.query;
+
   const adminLat = Number(lat);
   const adminLon = Number(lon);
 
   const mentors = await Mentor.find();
 
-  // Haversine distance calculation
+  // Convert teaching range "5km" / "25km+" / "anywhere"
+  function normalizeRange(range) {
+    if (!range) return Infinity;
+
+    range = range.toLowerCase();
+
+    if (range === "anywhere") return Infinity;
+
+    if (range.endsWith("+")) {
+      return parseInt(range); // "25km+" -> 25
+    }
+
+    return parseInt(range); // "5km" -> 5
+  }
+
+  // Haversine distance calculator
   function getDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // km
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -23,23 +39,45 @@ router.get("/nearby-mentors", async (req, res) => {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c;
+    return R * c; // km
   }
 
-  let sorted = mentors
-    .map(m => ({
-      ...m._doc,
-      distance: getDistance(adminLat, adminLon, m.location.lat, m.location.lon)
-    }))
-    .sort((a, b) => {
-      // first available → nearest
-      if (a.isAvailable && !b.isAvailable) return -1;
-      if (!a.isAvailable && b.isAvailable) return 1;
-      return a.distance - b.distance;
-    });
+  let enriched = mentors.map(m => {
+    const distance = getDistance(adminLat, adminLon, m.location.lat, m.location.lon);
 
-  res.json(sorted);
+    const numericRange = normalizeRange(m.teachingRange);
+
+    const isInRange = distance <= numericRange;
+
+    return {
+      ...m._doc,
+      distance,
+      convertedRange: numericRange,
+      isInRange,
+    };
+  });
+
+  // Sorting logic:
+  // 1. In-range mentors first
+  // 2. Then by nearest distance
+  // 3. Then available ones above unavailable
+  enriched.sort((a, b) => {
+
+    // 1️⃣ In-range priority
+    if (a.isInRange && !b.isInRange) return -1;
+    if (!a.isInRange && b.isInRange) return 1;
+
+    // 2️⃣ Available mentors first
+    if (a.isAvailable && !b.isAvailable) return -1;
+    if (!a.isAvailable && b.isAvailable) return 1;
+
+    // 3️⃣ Finally, nearest first
+    return a.distance - b.distance;
+  });
+
+  res.json(enriched);
 });
+
 
 
 // GET all mentors
