@@ -116,9 +116,6 @@ router.get("/nearby-mentors", async (req, res) => {
   res.json(enriched);
 });
 
-
-
-
 // GET all mentors
 router.get("/", async (req, res) => {
   try {

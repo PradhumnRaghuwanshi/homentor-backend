@@ -7,11 +7,9 @@ const MentorSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    // required: true,
   },
   gender: {
     type: String,
-    // required: true,
   },
   age: {
     type: Number,
@@ -114,8 +112,13 @@ const MentorSchema = new mongoose.Schema({
   // ⭐ Add this block
   coordinates: {
     type: { type: String, default: "Point" },
-    coordinates: { type: [Number],index: "2dsphere", default: [0, 0] },
+    coordinates: { type: [Number], index: "2dsphere", default: [0, 0] },
   },
+  category: {
+  type: String,
+  enum: ["gold", "silver", "budget"],
+  default: "silver"
+}
 });
 
 MentorSchema.index({ coordinates: "2dsphere" });
