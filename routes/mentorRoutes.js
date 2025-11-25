@@ -14,17 +14,17 @@ router.get("/nearby-mentors", async (req, res) => {
   function normalizeRange(range) {
     if (!range) return Infinity;
 
-    const str = range.toLowerCase();
+    let r = range.toLowerCase();
 
-    if (str === "anywhere") return Infinity;
-    if (str.endsWith("+")) return parseInt(str);
+    if (r === "anywhere") return Infinity;
+    if (r.endsWith("+")) return parseInt(r); // "25km+" → 25
 
-    return parseInt(str);
+    return parseInt(r); // "5km" → 5
   }
 
-  // Haversine distance calculator
+  // Distance calculator (Haversine)
   function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
 
@@ -34,12 +34,10 @@ router.get("/nearby-mentors", async (req, res) => {
       Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLon / 2) ** 2;
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // km
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   }
 
-  let enriched = mentors.map((m) => {
+  let enriched = mentors.map(m => {
     const distance = getDistance(
       adminLat,
       adminLon,
@@ -48,55 +46,70 @@ router.get("/nearby-mentors", async (req, res) => {
     );
 
     const numericRange = normalizeRange(m.teachingRange);
-
     const isInRange = distance <= numericRange;
 
-    // SUBJECT FILTER
-    const matchSubject = subject
-      ? m.subjects?.map((s) => s.toLowerCase()).includes(subject.toLowerCase())
-      : true;
+    // ---------------------------
+    // CLASS & SUBJECT FILTER LOGIC
+    // ---------------------------
 
-    // CLASS FILTER
-    const matchClass = classLevel
-      ? m.classes?.includes(String(classLevel))
-      : true;
+    let isClassMatch = true;
+    let isSubjectMatch = true;
+
+    const prefs = m.teachingPreferences?.school || {};
+
+    // If class filter applied
+    if (classLevel) {
+      const classKey = String(classLevel).toLowerCase();
+
+      isClassMatch = Object.keys(prefs)
+        .map(k => k.toLowerCase())
+        .includes(classKey);
+    }
+
+    // If subject filter applied
+    if (subject && classLevel) {
+      const subjects = prefs[classLevel] || [];
+
+      isSubjectMatch = subjects
+        .map(s => s.toLowerCase())
+        .includes(subject.toLowerCase());
+    }
 
     // RANK FILTER
-    const matchRank = rank ? Number(m.adminRanking) === Number(rank) : true;
+    const isRankMatch = rank ? Number(m.adminRanking) === Number(rank) : true;
 
-    const strongMatch = matchSubject && matchClass && matchRank;
+    const strongMatch =
+      isClassMatch &&
+      isSubjectMatch &&
+      isRankMatch;
 
     return {
       ...m._doc,
       distance,
       convertedRange: numericRange,
       isInRange,
-      matchSubject,
-      matchClass,
-      matchRank,
+      isClassMatch,
+      isSubjectMatch,
+      isRankMatch,
       strongMatch,
     };
   });
 
-  // 🔥 Final sorting priority:
-  // 1️⃣ Strong matches (subject/class/rank all true)
-  // 2️⃣ In teaching range
-  // 3️⃣ Available mentors
-  // 4️⃣ Nearest distance
+  // FINAL SORTING PRIORITY
   enriched.sort((a, b) => {
-    // STRONG FILTER MATCH FIRST
+    // 1️⃣ Strong match first (class + subject + rank)
     if (a.strongMatch && !b.strongMatch) return -1;
     if (!a.strongMatch && b.strongMatch) return 1;
 
-    // In-range priority
+    // 2️⃣ In teaching range
     if (a.isInRange && !b.isInRange) return -1;
     if (!a.isInRange && b.isInRange) return 1;
 
-    // Available mentors first
+    // 3️⃣ Available mentors first
     if (a.isAvailable && !b.isAvailable) return -1;
     if (!a.isAvailable && b.isAvailable) return 1;
 
-    // Nearest first
+    // 4️⃣ Nearest first
     return a.distance - b.distance;
   });
 
