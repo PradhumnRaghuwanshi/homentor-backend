@@ -313,11 +313,15 @@ router.post("/:id/change-teacher", async (req, res) => {
     // safety: at least 1 class
     const finalNewDuration = newDuration > 0 ? newDuration : 1;
 
+    const oldMentor = await Mentor.findById(booking.mentor);
+
     // -------------------------------
     // 5️⃣ STORE OLD TEACHER HISTORY
     // -------------------------------
     booking.teacherHistory.push({
       teacherId: booking.mentor,
+      fullName : oldMentor.fullName,
+      phone : oldMentor.phone,
       perClassPrice: perClassOld.toFixed(0),
       classesTaken: completedClasses,
       amountToPay: consumedAmount.toFixed(0),

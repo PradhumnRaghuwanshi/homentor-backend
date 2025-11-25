@@ -7,6 +7,8 @@ const teacherHistorySchema = new mongoose.Schema({
     ref: "Mentor",
     required: true,
   },
+  fullName : {type : String},
+  phone: {type: Number},
   perClassPrice: {
     type: Number,
     required: true,
