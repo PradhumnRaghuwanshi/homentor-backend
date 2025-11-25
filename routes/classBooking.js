@@ -275,6 +275,89 @@ router.post("/:id/terminate", async (req, res) => {
   }
 });
 
+router.post("/:id/change-teacher", async (req, res) => {
+  try {
+    const { newTeacherId, newTeacherPrice } = req.body;
+    const booking = await ClassBooking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    // -------------------------------
+    // 1️⃣ OLD TEACHER COMPLETED CLASSES
+    // -------------------------------
+    const totalDuration = Number(booking.duration); // original total classes
+    const perClassOld = booking.price / totalDuration;
+
+    const completedClasses = Math.floor((booking.progress || 0) / 60);
+
+    const consumedAmount = completedClasses * perClassOld;
+
+    // -------------------------------
+    // 2️⃣ REMAINING AMOUNT
+    // -------------------------------
+    const totalAmount = booking.price; // original price  
+    const remainingAmount = Math.max(totalAmount - consumedAmount, 0);
+
+    // -------------------------------
+    // 3️⃣ NEW TEACHER PRICE (per class)
+    // -------------------------------
+    const perClassNew = Number(newTeacherPrice);
+
+    // -------------------------------
+    // 4️⃣ NEW TOTAL CLASSES (duration)
+    // -------------------------------
+    const newDuration = Math.floor(remainingAmount / perClassNew);
+
+    // safety: at least 1 class
+    const finalNewDuration = newDuration > 0 ? newDuration : 1;
+
+    // -------------------------------
+    // 5️⃣ STORE OLD TEACHER HISTORY
+    // -------------------------------
+    booking.teacherHistory.push({
+      teacherId: booking.mentor,
+      perClassPrice: perClassOld,
+      classesTaken: completedClasses,
+      amountToPay: consumedAmount,
+      switchedAt: new Date(),
+    });
+
+    // -------------------------------
+    // 6️⃣ UPDATE BOOKING FOR NEW TEACHER
+    // -------------------------------
+    booking.mentor = newTeacherId;
+    booking.duration = finalNewDuration;       // UPDATED DURATION  
+    booking.price = remainingAmount;          // only remaining amount applied  
+    booking.progress = 0;                     // reset for new teacher  
+    booking.session += 1;
+
+    await booking.save();
+
+    res.json({
+      success: true,
+      message: "Teacher switched successfully",
+      previousTeacher: {
+        completedClasses,
+        consumedAmount
+      },
+      newTeacher: {
+        newTeacherId,
+        perClassNew,
+        newDuration: finalNewDuration
+      },
+      remainingAmount
+    });
+
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+
 
 
 

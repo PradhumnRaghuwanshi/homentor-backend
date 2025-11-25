@@ -1,6 +1,30 @@
 // models/ClassBooking.js
 const mongoose = require("mongoose");
 
+const teacherHistorySchema = new mongoose.Schema({
+  teacherId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Mentor",
+    required: true,
+  },
+  perClassPrice: {
+    type: Number,
+    required: true,
+  },
+  classesTaken: {
+    type: Number,
+    default: 0,
+  },
+  amountToPay: {
+    type: Number,
+    default: 0,
+  },
+  switchedAt: {
+    type: Date,
+    default: Date.now,
+  }
+});
+
 const classBookingSchema = new mongoose.Schema({
   mentor: {
     type: mongoose.Schema.Types.ObjectId,
@@ -15,7 +39,7 @@ const classBookingSchema = new mongoose.Schema({
   subject: { type: String },
   status: {
     type: String,
-    enum: ["pending_schedule", "scheduled", "running" , "completed", "cancelled", "terminated"],
+    enum: ["pending_schedule", "scheduled", "running", "completed", "cancelled", "terminated"],
     default: "pending_schedule",
   },
   bookedDate: { type: Date, required: true, default: Date.now },
@@ -37,18 +61,19 @@ const classBookingSchema = new mongoose.Schema({
     type: Number,
     default: 0   // number of completed lectures
   },
-  refundAmount: {type: Number, default: 0},
-  terminatedAt: {type : Date},
+  refundAmount: { type: Number, default: 0 },
+  terminatedAt: { type: Date },
   isCompleted: {
     type: Boolean,
     default: false
   },
-
+// NEW → Tracks all teachers who taught this booking
+  teacherHistory: [teacherHistorySchema],
   mentorCompletion: {
     type: Boolean,
     default: false
   },
-  
+
   adminApproved: {
     type: Boolean,
     default: false
@@ -58,10 +83,10 @@ const classBookingSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  session: {type: Number, default: 1},
+  session: { type: Number, default: 1 },
   feedback: { type: String },
-  isDemo : {type : Boolean, default : false},
-  demoStatus : {type: String, default: "not-demo"}
+  isDemo: { type: Boolean, default: false },
+  demoStatus: { type: String, default: "not-demo" }
 
 });
 
