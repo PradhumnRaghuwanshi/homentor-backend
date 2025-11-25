@@ -255,11 +255,10 @@ router.post("/:id/terminate", async (req, res) => {
     }
 
     const totalClasses = Number(booking.duration) || 22;
-    const completed = booking.progress || 0;
+    const completed = booking.progress/60 || 0;
 
     const perClassPrice = booking.price / totalClasses;
-    const refundAmount = Math.max((totalClasses - completed) * perClassPrice, 0);
-
+    const refundAmount = req.body.refundableAmount;
     booking.status = "terminated";
     booking.refundAmount = refundAmount;
     booking.terminatedAt = new Date();
