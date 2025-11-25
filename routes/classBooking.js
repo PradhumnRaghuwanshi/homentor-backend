@@ -318,9 +318,9 @@ router.post("/:id/change-teacher", async (req, res) => {
     // -------------------------------
     booking.teacherHistory.push({
       teacherId: booking.mentor,
-      perClassPrice: perClassOld,
+      perClassPrice: perClassOld.toFixed(0),
       classesTaken: completedClasses,
-      amountToPay: consumedAmount,
+      amountToPay: consumedAmount.toFixed(0),
       switchedAt: new Date(),
     });
 
