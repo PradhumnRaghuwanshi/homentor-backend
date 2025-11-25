@@ -303,7 +303,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     // -------------------------------
     // 3️⃣ NEW TEACHER PRICE (per class)
     // -------------------------------
-    const perClassNew = Number(newTeacherPrice);
+    const perClassNew = Number(newTeacherPrice/22);
 
     // -------------------------------
     // 4️⃣ NEW TOTAL CLASSES (duration)
@@ -329,9 +329,6 @@ router.post("/:id/change-teacher", async (req, res) => {
     // -------------------------------
     booking.mentor = newTeacherId;
     booking.duration = finalNewDuration;       // UPDATED DURATION  
-    booking.price = remainingAmount;          // only remaining amount applied  
-    booking.progress = 0;                     // reset for new teacher  
-    booking.session += 1;
 
     await booking.save();
 
