@@ -213,10 +213,9 @@ router.post("/:id/mentor-complete", async (req, res) => {
     if (!booking) return res.status(404).json({ message: "Not found" });
 
 
-
     // Check if classes completed
     const totalClasses = Number(booking.duration);  // usually 22
-    const completed = booking.progress;
+    const completed = Math.floor(booking.progress/60);
     const remaining = totalClasses - completed;
 
     // ❌ If classes are not fully completed
