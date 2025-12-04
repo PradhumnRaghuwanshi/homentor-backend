@@ -173,6 +173,7 @@ router.post("/:id/parent-complete", async (req, res) => {
 
     // ✅ All classes finished → allow parent confirmation
     booking.parentCompletion = !booking.parentCompletion;
+    booking.status = "completed";
     await booking.save();
 
     res.json({
