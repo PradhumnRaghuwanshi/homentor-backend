@@ -255,9 +255,6 @@ router.post("/:id/terminate", async (req, res) => {
     }
 
     const totalClasses = Number(booking.duration) || 22;
-    const completed = booking.progress/60 || 0;
-
-    const perClassPrice = booking.price / totalClasses;
     const refundAmount = req.body.refundableAmount;
     booking.status = "terminated";
     booking.refundAmount = refundAmount;

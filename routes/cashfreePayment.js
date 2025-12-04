@@ -48,7 +48,7 @@ router.post("/create-order", async (req, res) => {
             duration: duration ? duration : null,
             session: session ? session : 1,
             isDemo: isDemo,
-            classBookig: classBookingId
+            classBookig: classBookingId ? classBookingId : null
         });
         res.status(200).json(response.data);
     } catch (error) {
@@ -59,8 +59,6 @@ router.post("/create-order", async (req, res) => {
         });
     }
 });
-
-const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLThDODE3M0UzMDM4QTQ4NCIsImlhdCI6MTc1NDAzMTk0MywiZXhwIjoxOTExNzExOTQzfQ.xZesgbwmv9g2uypje1YpPaJLA1ZyXHFO0eNv3gjpBo6hfY65D3uaMIlsuDhJRL1zsTaL4Z8O5ThNk0iPdbkpfw";
 
 router.get('/verify-order/:id', async (req, res) => {
     try {
@@ -102,10 +100,30 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledTime = oldBooking.scheduledTime
                 newBooking.scheduledDate = oldBooking.scheduledDate
                 newBooking.subject = oldBooking.subject
-
-
+                newBooking.demoStatus = "session_continued"
                 newBooking.save()
-            } else {
+            } 
+            else if (oldBooking.classBookig){
+                let oldClassBooking = await ClassBooking.findById(oldBooking.classBookig)
+                let newBooking = new ClassBooking({
+                    mentor: oldOrder.mentor._id,
+                    price: oldOrder.amount,
+                    parent: oldOrder.parent._id,
+                    duration: oldOrder.duration ? oldOrder.duration : 22,
+                    session: oldOrder?.session
+                })
+                newBooking.isDemo = false
+                newBooking.status = "scheduled"
+                newBooking.class = oldClassBooking.class
+                newBooking.studentName = oldClassBooking.studentName
+                newBooking.school = oldClassBooking.school
+                newBooking.scheduledTime = oldClassBooking.scheduledTime
+                newBooking.scheduledDate = oldClassBooking.scheduledDate
+                newBooking.subject = oldClassBooking.subject
+                newBooking.demoStatus = "session_continued"
+                await newBooking.save()
+
+            }  else {
 
                 const newBooking = new ClassBooking({
                     mentor: oldOrder.mentor._id,
