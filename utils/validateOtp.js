@@ -1,5 +1,4 @@
 const axios = require("axios");
-const generateToken = require("./generateToken");
 const User = require("../models/User");
 
 const validateOtp = async (verificationId, code, phone) => {
