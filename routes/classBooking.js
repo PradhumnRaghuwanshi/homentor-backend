@@ -134,7 +134,7 @@ router.get("/mentor/:id", async (req, res) => {
 
     // 2️⃣ History bookings (old mentor)
     const historyBookings = await ClassBooking.find({
-      "mentorHistory.mentor": id
+      "mentorHistory.teacherId": id
     })
       .populate("parent", "phone address")
       .populate("mentorHistory.mentor", "fullName")
