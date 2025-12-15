@@ -101,6 +101,7 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledDate = oldBooking.scheduledDate
                 newBooking.subject = oldBooking.subject
                 newBooking.demoStatus = "session_continued"
+                newBooking.sessionContinued = true
                 newBooking.save()
             } 
             else if (oldBooking.classBookig){
@@ -120,7 +121,8 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledTime = oldClassBooking.scheduledTime
                 newBooking.scheduledDate = oldClassBooking.scheduledDate
                 newBooking.subject = oldClassBooking.subject
-                newBooking.demoStatus = "session_continued"
+                newBooking.demoStatus = "session_continued",
+                newBooking.sessionContinued = true
                 await newBooking.save()
 
             }  else {

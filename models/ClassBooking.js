@@ -49,10 +49,6 @@ const classBookingSchema = new mongoose.Schema({
   scheduledTime: { type: String },
   duration: { type: String, default: "22" },
   price: { type: Number, required: true },
-  type: {
-    type: String,
-    enum: ["one-on-one", "consultation"],
-  },
   rating: { type: Number, min: 1, max: 5 },
   createdAt: { type: Date, default: Date.now },
   studentName: { type: String },
@@ -88,7 +84,8 @@ const classBookingSchema = new mongoose.Schema({
   session: { type: Number, default: 1 },
   feedback: { type: String },
   isDemo: { type: Boolean, default: false },
-  demoStatus: { type: String, default: "not-demo" }
+  demoStatus: { type: String, default: "not-demo" },
+  sessionContinued : {type: Boolean, default : "false"}
 
 });
 
