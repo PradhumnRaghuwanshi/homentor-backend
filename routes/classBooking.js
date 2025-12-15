@@ -37,7 +37,7 @@ router.post("/manual-booking", async (req, res) => {
     const { phone, address, ...bookingData } = req.body;
 
     // 1️⃣ Check if user already exists
-    let user = await User.findOne({ phone});
+    let user = await User.findOne({ phone });
 
     // 2️⃣ If user does NOT exist, create it
     if (!user) {
@@ -68,13 +68,13 @@ router.post("/manual-booking", async (req, res) => {
       ...bookingData,
       parent: user._id, // LINK booking to user
       mentor: req.body.mentorId,
-      status : "scheduled",
-      duration : req.body.duration,
-      price : req.body.amount,
-      session : 1,
-      class : req.body.className,
-      scheduledTime : req.body.time,
-      scheduledDate : req.body.date
+      status: "scheduled",
+      duration: req.body.duration,
+      price: req.body.amount,
+      session: 1,
+      class: req.body.className,
+      scheduledTime: req.body.time,
+      scheduledDate: req.body.date
     });
 
     const savedBooking = await newBooking.save();
@@ -131,11 +131,16 @@ router.get("/mentor/:id", async (req, res) => {
     })
       .populate("parent", "phone address")
       .sort({ createdAt: -1 });
-const mentorObjectId = new mongoose.Types.ObjectId(id);
+
+    const mentorObjectId = new mongoose.Types.ObjectId(id);
 
     // 2️⃣ History bookings (old mentor)
     const historyBookings = await ClassBooking.find({
-      "mentorHistory.teacherId": mentorObjectId
+      mentorHistory: {
+        $elemMatch: {
+          teacherId: mentorObjectId
+        }
+      }
     })
       .populate("parent", "phone address")
       .sort({ createdAt: -1 });
@@ -167,8 +172,8 @@ const mentorObjectId = new mongoose.Types.ObjectId(id);
 router.get("/student/:id", async (req, res) => {
   try {
     const booking = await ClassBooking.find({
-      parent : req.params.id,
-      sessionContinued : false
+      parent: req.params.id,
+      sessionContinued: false
     }).populate("mentor", "fullName profilePhoto phone teachingModes backupTeachers").sort({ createdAt: -1 });;
     if (!booking)
       return res.status(404).json({ success: false, message: "Not found" });
@@ -243,7 +248,7 @@ router.post("/:id/mentor-complete", async (req, res) => {
 
     // Check if classes completed
     const totalClasses = Number(booking.duration);  // usually 22
-    const completed = Math.floor(booking.progress/60);
+    const completed = Math.floor(booking.progress / 60);
     const remaining = totalClasses - completed;
 
     // ❌ If classes are not fully completed
@@ -256,7 +261,7 @@ router.post("/:id/mentor-complete", async (req, res) => {
 
     // ✅ All classes finished → allow parent confirmation
     booking.mentorCompletion = !booking.mentorCompletion;
-    if(booking.demoStatus == "running"){
+    if (booking.demoStatus == "running") {
       booking.demoStatus = "completed"
     }
 
@@ -328,7 +333,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     // -------------------------------
     // 3️⃣ NEW TEACHER PRICE (per class)
     // -------------------------------
-    const perClassNew = Number(newTeacherPrice/22);
+    const perClassNew = Number(newTeacherPrice / 22);
 
     // -------------------------------
     // 4️⃣ NEW TOTAL CLASSES (duration)
@@ -336,18 +341,18 @@ router.post("/:id/change-teacher", async (req, res) => {
     const newDuration = Math.floor(remainingAmount / perClassNew);
 
     // safety: at least 1 class
-    const finalNewDuration =  newDuration > 0 ? newDuration : 1;
-    
+    const finalNewDuration = newDuration > 0 ? newDuration : 1;
+
     const oldMentor = await Mentor.findById(booking.mentor);
-    
+
     console.log(finalNewDuration, newDuration, remainingAmount, perClassNew, newTeacherPrice)
     // -------------------------------
     // 5️⃣ STORE OLD TEACHER HISTORY
     // -------------------------------
     booking.teacherHistory.push({
       teacherId: booking.mentor,
-      fullName : oldMentor.fullName,
-      phone : oldMentor.phone,
+      fullName: oldMentor.fullName,
+      phone: oldMentor.phone,
       perClassPrice: perClassOld.toFixed(0),
       classesTaken: completedClasses,
       amountToPay: consumedAmount.toFixed(0),
