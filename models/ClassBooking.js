@@ -49,6 +49,7 @@ const classBookingSchema = new mongoose.Schema({
   scheduledTime: { type: String },
   duration: { type: String, default: "22" },
   price: { type: Number, required: true },
+  commissionPrice : {type: Number},
   rating: { type: Number, min: 1, max: 5 },
   createdAt: { type: Date, default: Date.now },
   studentName: { type: String },

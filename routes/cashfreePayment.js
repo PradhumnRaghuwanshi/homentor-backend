@@ -63,10 +63,9 @@ router.post("/create-order", async (req, res) => {
 router.get('/verify-order/:id', async (req, res) => {
     try {
         const orderId = req.params.id;
-
         const oldOrder = await Order.findOne({
             orderId: orderId
-        }).populate("mentor", "fullName phone").populate("parent", "phone");
+        }).populate("mentor", "fullName phone teachingModes").populate("parent", "phone");
 
         const response = await cashfree.PGOrderFetchPayments(orderId)
 
@@ -90,7 +89,8 @@ router.get('/verify-order/:id', async (req, res) => {
                     price: oldOrder.amount,
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
-                    session: oldOrder?.session
+                    session: oldOrder?.session,
+                    commissionPrice : oldOrder?.mentor?.teachingModes.homeTutuion.margin
                 })
 
                 newBooking.isDemo = false
@@ -112,7 +112,8 @@ router.get('/verify-order/:id', async (req, res) => {
                     price: oldOrder.amount,
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
-                    session: oldOrder?.session
+                    session: oldOrder?.session,
+                    commissionPrice : oldOrder?.mentor?.teachingModes.homeTutuion.margin
                 })
                 newBooking.isDemo = false
                 newBooking.status = "scheduled"
@@ -133,7 +134,8 @@ router.get('/verify-order/:id', async (req, res) => {
                     price: oldOrder.amount,
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
-                    session: oldOrder?.session
+                    session: oldOrder?.session,
+                    commissionPrice : oldOrder?.mentor?.teachingModes.homeTutuion.margin
                 })
                 await newBooking.save()
             }
