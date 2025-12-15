@@ -296,7 +296,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     // -------------------------------
     // 2️⃣ REMAINING AMOUNT
     // -------------------------------
-    const totalAmount = booking.price; // original price  
+    const totalAmount = booking.price - booking.commissionPrice; // original price  
     const remainingAmount = Math.max(totalAmount - consumedAmount, 0);
 
     // -------------------------------
@@ -311,9 +311,10 @@ router.post("/:id/change-teacher", async (req, res) => {
 
     // safety: at least 1 class
     const finalNewDuration = newDuration > 0 ? newDuration : 1;
-
+    
     const oldMentor = await Mentor.findById(booking.mentor);
-
+    
+    console.log(finalNewDuration, newDuration, remainingAmount, perClassNew, newTeacherPrice)
     // -------------------------------
     // 5️⃣ STORE OLD TEACHER HISTORY
     // -------------------------------
