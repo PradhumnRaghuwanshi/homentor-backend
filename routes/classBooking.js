@@ -136,7 +136,7 @@ router.get("/mentor/:id", async (req, res) => {
 
     // 2️⃣ History bookings (old mentor)
     const historyBookings = await ClassBooking.find({
-      mentorHistory: {
+      teacherHistory: {
         $elemMatch: {
           teacherId: mentorObjectId
         }
