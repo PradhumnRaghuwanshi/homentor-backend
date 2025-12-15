@@ -310,7 +310,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     const newDuration = Math.floor(remainingAmount / perClassNew);
 
     // safety: at least 1 class
-    const finalNewDuration = newDuration > 0 ? newDuration : 1;
+    const finalNewDuration =  newDuration > 0 ? newDuration : 1;
     
     const oldMentor = await Mentor.findById(booking.mentor);
     
@@ -332,7 +332,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     // 6️⃣ UPDATE BOOKING FOR NEW TEACHER
     // -------------------------------
     booking.mentor = newTeacherId;
-    booking.duration = finalNewDuration;       // UPDATED DURATION  
+    booking.duration = finalNewDuration + completedClasses;       // UPDATED DURATION  
 
     await booking.save();
 
