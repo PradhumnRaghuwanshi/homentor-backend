@@ -62,6 +62,7 @@ router.post("/", async (req, res) => {
 
     // 5️⃣ Push class record
     classBooking.classesRecord.push(classRecord._id);
+    classBooking.status = "running"
 
     // 6️⃣ Save booking
     await classBooking.save();
