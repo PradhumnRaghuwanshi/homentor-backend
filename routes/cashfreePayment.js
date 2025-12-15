@@ -83,7 +83,8 @@ router.get('/verify-order/:id', async (req, res) => {
                 let oldBooking = await ClassBooking.findOne({
                     _id: oldOrder.classBookig
                 })
-
+                oldBooking.sessionContinued = true
+                await oldBooking.save()
                 let newBooking = new ClassBooking({
                     mentor: oldOrder.mentor._id,
                     price: oldOrder.amount,
@@ -101,7 +102,7 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledDate = oldBooking.scheduledDate
                 newBooking.subject = oldBooking.subject
                 newBooking.demoStatus = "session_continued"
-                newBooking.sessionContinued = true
+                
                 newBooking.save()
             } 
             else if (oldBooking.classBookig){
@@ -122,7 +123,7 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledDate = oldClassBooking.scheduledDate
                 newBooking.subject = oldClassBooking.subject
                 newBooking.demoStatus = "session_continued",
-                newBooking.sessionContinued = true
+               
                 await newBooking.save()
 
             }  else {
