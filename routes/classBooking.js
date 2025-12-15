@@ -287,7 +287,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     // 1️⃣ OLD TEACHER COMPLETED CLASSES
     // -------------------------------
     const totalDuration = Number(booking.duration); // original total classes
-    const perClassOld = booking.price / totalDuration;
+    const perClassOld = (booking.price - booking.commissionPrice) / totalDuration;
 
     const completedClasses = Math.floor((booking.progress || 0) / 60);
 
