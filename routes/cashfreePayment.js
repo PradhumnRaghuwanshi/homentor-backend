@@ -67,6 +67,8 @@ router.get('/verify-order/:id', async (req, res) => {
             orderId: orderId
         }).populate("mentor", "fullName phone teachingModes").populate("parent", "phone");
 
+        console.log(oldOrder)
+
         const response = await cashfree.PGOrderFetchPayments(orderId)
 
         console.log('Order fetched successfully 2:', response.data);
