@@ -131,10 +131,11 @@ router.get("/mentor/:id", async (req, res) => {
     })
       .populate("parent", "phone address")
       .sort({ createdAt: -1 });
+const mentorObjectId = new mongoose.Types.ObjectId(id);
 
     // 2️⃣ History bookings (old mentor)
     const historyBookings = await ClassBooking.find({
-      "mentorHistory.teacherId": id
+      "mentorHistory.teacherId": mentorObjectId
     })
       .populate("parent", "phone address")
       .sort({ createdAt: -1 });
