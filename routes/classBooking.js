@@ -124,7 +124,7 @@ router.get("/mentor/:id", async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid mentor ID" });
     }
 
-    const booking = await ClassBooking.find({ mentor: id }).populate("parent", "phone address");
+    const booking = await ClassBooking.find({ mentor: id, sessionContinued: true }).populate("parent", "phone address").sort({ createdAt: -1 });
 
     if (!booking || booking.length === 0) {
       return res.status(404).json({ success: false, message: "No bookings found" });
