@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const Room = require("../models/Room");
-const sendOtp = require("../utils/sendOtp");
 
 
 router.post("/save-fcm-token", async (req, res) => {

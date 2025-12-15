@@ -23,6 +23,6 @@ app.use("/api/demo-booking", require("./routes/demoBookingRoutes.js"));
 
 
 const PORT = 5000;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`✅ Server with socket.io running on port ${PORT}`);
 });
