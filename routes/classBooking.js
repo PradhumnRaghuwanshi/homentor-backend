@@ -4,6 +4,7 @@ const router = express.Router();
 const ClassBooking = require("../models/ClassBooking");
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const Mentor = require("../models/Mentor");
 
 // Get all class bookings
 router.get("/", async (req, res) => {
