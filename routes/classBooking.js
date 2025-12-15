@@ -137,9 +137,8 @@ router.get("/mentor/:id", async (req, res) => {
       "mentorHistory.teacherId": id
     })
       .populate("parent", "phone address")
-      .populate("mentorHistory.mentor", "fullName")
-      .sort({ updatedAt: -1 });
-
+      .sort({ createdAt: -1 });
+    console.log(historyBookings)
     if (
       activeBookings.length === 0 &&
       historyBookings.length === 0
