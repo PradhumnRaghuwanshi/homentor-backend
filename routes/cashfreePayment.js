@@ -90,7 +90,7 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes.homeTutuion.margin
+                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin
                 })
 
                 newBooking.isDemo = false
@@ -113,7 +113,7 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes.homeTutuion.margin
+                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin
                 })
                 newBooking.isDemo = false
                 newBooking.status = "scheduled"
@@ -135,7 +135,7 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes.homeTutuion.margin
+                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin
                 })
                 await newBooking.save()
             }
