@@ -119,24 +119,50 @@ router.put("/booking/:id", async (req, res) => {
 router.get("/mentor/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("Mentor ID:", id);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Invalid mentor ID" });
     }
 
-    const booking = await ClassBooking.find({ mentor: id, sessionContinued: false }).populate("parent", "phone address").sort({ createdAt: -1 });
+    // 1️⃣ Active bookings (current mentor)
+    const activeBookings = await ClassBooking.find({
+      mentor: id,
+      sessionContinued: false
+    })
+      .populate("parent", "phone address")
+      .sort({ createdAt: -1 });
 
-    if (!booking || booking.length === 0) {
-      return res.status(404).json({ success: false, message: "No bookings found" });
+    // 2️⃣ History bookings (old mentor)
+    const historyBookings = await ClassBooking.find({
+      "mentorHistory.mentor": id
+    })
+      .populate("parent", "phone address")
+      .populate("mentorHistory.mentor", "fullName")
+      .sort({ updatedAt: -1 });
+
+    if (
+      activeBookings.length === 0 &&
+      historyBookings.length === 0
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: "No bookings found"
+      });
     }
 
-    res.status(200).json({ success: true, data: booking });
+    res.status(200).json({
+      success: true,
+      data: [
+        ...activeBookings,
+        ...historyBookings
+      ]
+    });
   } catch (error) {
-    console.error("Error fetching bookings:", error); // log the actual error
+    console.error("Error fetching mentor bookings:", error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+
 
 router.get("/student/:id", async (req, res) => {
   try {
