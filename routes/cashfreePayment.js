@@ -109,8 +109,8 @@ router.get('/verify-order/:id', async (req, res) => {
                 
                 newBooking.save()
             } 
-            else if (oldBooking.classBookig){
-                let oldClassBooking = await ClassBooking.findById(oldBooking.classBookig)
+            else if (oldOrder.classBookig){
+                let oldClassBooking = await ClassBooking.findById(oldOrder.classBookig)
                 let newBooking = new ClassBooking({
                     mentor: oldOrder.mentor._id,
                     price: oldOrder.amount,
