@@ -309,72 +309,114 @@ router.post("/:id/change-teacher", async (req, res) => {
   try {
     const { newTeacherId, newTeacherMonthlyPrice } = req.body;
 
-    const booking = await ClassBooking.findById(req.params.id);
-    if (!booking) {
-      return res.status(404).json({ success: false, message: "Booking not found" });
+    if (!newTeacherId || !newTeacherMonthlyPrice) {
+      return res.status(400).json({
+        success: false,
+        message: "newTeacherId and newTeacherMonthlyPrice are required",
+      });
     }
 
-    const oldMentorId = booking.mentor;
+    const booking = await ClassBooking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
 
-    // 🔹 TOTAL NET MONEY
-    const netAmount = booking.price - booking.commissionPrice;
+    const MINUTES_PER_CLASS = 60;
 
-    // 🔹 OLD MENTOR PRICE PER CLASS
-    const oldPerClass = booking.currentPerClassPrice;
+    // 🔹 TOTAL NET AMOUNT (AFTER COMMISSION)
+    const netAmount = Number(booking.price || 0) - Number(booking.commissionPrice || 0);
 
-    // 🔹 CLASSES ALREADY DONE
-    const classesCompleted = booking.progress; // count of classes
+    // 🔹 TOTAL MINUTES COMPLETED
+    const totalMinutesCompleted = Number(booking.progress || 0);
 
-    // 🔹 MONEY CONSUMED SO FAR
-    const moneyConsumedSoFar =
-      booking.teacherHistory.reduce((sum, h) => sum + h.amountToPay, 0) +
-      (classesCompleted - booking.teacherHistory.reduce((s, h) => s + h.classesTaken, 0)) * oldPerClass;
+    // 🔹 TOTAL CLASSES COMPLETED
+    const totalClassesCompleted = Math.floor(totalMinutesCompleted / MINUTES_PER_CLASS);
+
+    // 🔹 HISTORY TOTALS
+    const historyClasses = booking.teacherHistory.reduce(
+      (sum, h) => sum + Number(h.classesTaken || 0),
+      0
+    );
+
+    const historyMoney = booking.teacherHistory.reduce(
+      (sum, h) => sum + Number(h.amountToPay || 0),
+      0
+    );
+
+    // 🔹 CURRENT MENTOR CLASSES (NOT YET SETTLED)
+    const currentMentorClasses = Math.max(
+      totalClassesCompleted - historyClasses,
+      0
+    );
+
+    const oldPerClassPrice = Number(booking.currentPerClassPrice || 0);
+    const currentMentorAmount = currentMentorClasses * oldPerClassPrice;
+
+    // 🔹 TOTAL MONEY USED
+    const moneyConsumedSoFar = historyMoney + currentMentorAmount;
 
     // 🔹 REMAINING MONEY
     const remainingMoney = Math.max(netAmount - moneyConsumedSoFar, 0);
 
     // 🔹 NEW MENTOR PRICE
-    const newPerClass = newTeacherMonthlyPrice / 22;
+    const newPerClassPrice = Number(newTeacherMonthlyPrice) / 22;
 
-    // 🔹 CALCULATE NEW REMAINING CLASSES
-    const remainingClasses = Math.max(Math.floor(remainingMoney / newPerClass), 1);
+    if (newPerClassPrice <= 0 || isNaN(newPerClassPrice)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid new teacher price",
+      });
+    }
 
-    // 🔹 PUSH OLD MENTOR HISTORY
-    const oldMentor = await Mentor.findById(oldMentorId);
+    // 🔹 REMAINING CLASSES FOR NEW MENTOR
+    const remainingClasses = Math.max(
+      Math.floor(remainingMoney / newPerClassPrice),
+      1
+    );
 
-    const oldMentorClasses =
-      classesCompleted -
-      booking.teacherHistory.reduce((s, h) => s + h.classesTaken, 0);
+    // 🔹 SAVE OLD MENTOR HISTORY (ONLY ONCE)
+    if (currentMentorClasses > 0) {
+      const oldMentor = await Mentor.findById(booking.mentor);
 
-    if (oldMentorClasses > 0) {
       booking.teacherHistory.push({
-        teacherId: oldMentorId,
-        fullName: oldMentor.fullName,
-        phone: oldMentor.phone,
-        perClassPrice: oldPerClass,
-        classesTaken: oldMentorClasses,
-        amountToPay: oldMentorClasses * oldPerClass,
+        teacherId: booking.mentor,
+        fullName: oldMentor?.fullName || "",
+        phone: oldMentor?.phone || "",
+        perClassPrice: oldPerClassPrice,
+        classesTaken: currentMentorClasses,
+        amountToPay: currentMentorAmount,
         switchedAt: new Date(),
       });
     }
 
-    // 🔹 UPDATE BOOKING
+    // 🔹 UPDATE BOOKING FOR NEW MENTOR
     booking.mentor = newTeacherId;
-    booking.currentPerClassPrice = newPerClass;
+    booking.currentPerClassPrice = newPerClassPrice;
     booking.remainingClasses = remainingClasses;
 
     await booking.save();
 
-    res.json({
+    res.status(200).json({
       success: true,
-      remainingMoney,
-      remainingClasses,
-      newPerClass,
+      message: "Teacher changed successfully",
+      summary: {
+        totalClassesCompleted,
+        moneyConsumedSoFar,
+        remainingMoney,
+        newPerClassPrice,
+        remainingClasses,
+      },
     });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+  } catch (error) {
+    console.error("Change teacher error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while changing teacher",
+    });
   }
 });
 
