@@ -139,9 +139,10 @@ router.get("/mentor/:id", async (req, res) => {
       teacherHistory: {
         $elemMatch: {
           teacherId: mentorObjectId
-        },
+        }
+      }, 
       sessionContinued : false
-      }
+
     })
       .populate("parent", "phone address")
       .sort({ createdAt: -1 });
