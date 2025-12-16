@@ -220,7 +220,7 @@ router.get("/:id", async (req, res) => {
 router.post("/batch", async (req, res) => {
   try {
     const mentorIds = req.body.ids;   // receives ["id1", "id2", "id3"]
-
+    
     const mentors = await Mentor.find({
       _id: { $in: mentorIds }
     }).select("fullName phone profilePhoto teachingModes phone");
