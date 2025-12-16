@@ -92,7 +92,9 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin
+                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin,
+                    currentPerClassPrice: oldOrder?.mentor?.teachingModes?.homeTutuion?.monthlyPrice / oldOrder?.duration,
+                    remainingClasses: oldOrder.duration ? oldOrder.duration : 22
                 })
 
                 newBooking.isDemo = false
@@ -115,7 +117,9 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin
+                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin,
+                    currentPerClassPrice: oldOrder?.mentor?.teachingModes?.homeTutuion?.monthlyPrice / oldOrder?.duration,
+                    remainingClasses: oldOrder.duration ? oldOrder.duration : 22
                 })
                 newBooking.isDemo = false
                 newBooking.status = "scheduled"
@@ -137,7 +141,9 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin
+                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTutuion?.margin,
+                    currentPerClassPrice: oldOrder?.mentor?.teachingModes?.homeTutuion?.monthlyPrice / oldOrder?.duration,
+                    remainingClasses: oldOrder.duration ? oldOrder.duration : 22
                 })
                 await newBooking.save()
             }

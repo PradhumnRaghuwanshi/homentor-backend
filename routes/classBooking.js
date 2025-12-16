@@ -307,86 +307,77 @@ router.post("/:id/terminate", async (req, res) => {
 
 router.post("/:id/change-teacher", async (req, res) => {
   try {
-    const { newTeacherId, newTeacherPrice } = req.body;
-    const booking = await ClassBooking.findById(req.params.id);
+    const { newTeacherId, newTeacherMonthlyPrice } = req.body;
 
+    const booking = await ClassBooking.findById(req.params.id);
     if (!booking) {
       return res.status(404).json({ success: false, message: "Booking not found" });
     }
 
-    // -------------------------------
-    // 1️⃣ OLD TEACHER COMPLETED CLASSES
-    // -------------------------------
-    const totalDuration = Number(booking.duration); // original total classes
-    const perClassOld = (booking.price - booking.commissionPrice) / totalDuration;
+    const oldMentorId = booking.mentor;
 
-    const completedClasses = Math.floor((booking.progress || 0) / 60);
+    // 🔹 TOTAL NET MONEY
+    const netAmount = booking.price - booking.commissionPrice;
 
-    const consumedAmount = completedClasses * perClassOld;
+    // 🔹 OLD MENTOR PRICE PER CLASS
+    const oldPerClass = booking.currentPerClassPrice;
 
-    // -------------------------------
-    // 2️⃣ REMAINING AMOUNT
-    // -------------------------------
-    const totalAmount = booking.price - booking.commissionPrice; // original price  
-    const remainingAmount = Math.max(totalAmount - consumedAmount, 0);
+    // 🔹 CLASSES ALREADY DONE
+    const classesCompleted = booking.progress; // count of classes
 
-    // -------------------------------
-    // 3️⃣ NEW TEACHER PRICE (per class)
-    // -------------------------------
-    const perClassNew = Number(newTeacherPrice / 22);
+    // 🔹 MONEY CONSUMED SO FAR
+    const moneyConsumedSoFar =
+      booking.teacherHistory.reduce((sum, h) => sum + h.amountToPay, 0) +
+      (classesCompleted - booking.teacherHistory.reduce((s, h) => s + h.classesTaken, 0)) * oldPerClass;
 
-    // -------------------------------
-    // 4️⃣ NEW TOTAL CLASSES (duration)
-    // -------------------------------
-    const newDuration = Math.floor(remainingAmount / perClassNew);
+    // 🔹 REMAINING MONEY
+    const remainingMoney = Math.max(netAmount - moneyConsumedSoFar, 0);
 
-    // safety: at least 1 class
-    const finalNewDuration = newDuration > 0 ? newDuration : 1;
+    // 🔹 NEW MENTOR PRICE
+    const newPerClass = newTeacherMonthlyPrice / 22;
 
-    const oldMentor = await Mentor.findById(booking.mentor);
+    // 🔹 CALCULATE NEW REMAINING CLASSES
+    const remainingClasses = Math.max(Math.floor(remainingMoney / newPerClass), 1);
 
-    console.log(finalNewDuration, newDuration, remainingAmount, perClassNew, newTeacherPrice)
-    // -------------------------------
-    // 5️⃣ STORE OLD TEACHER HISTORY
-    // -------------------------------
-    booking.teacherHistory.push({
-      teacherId: booking.mentor,
-      fullName: oldMentor.fullName,
-      phone: oldMentor.phone,
-      perClassPrice: perClassOld.toFixed(0),
-      classesTaken: completedClasses,
-      amountToPay: consumedAmount.toFixed(0),
-      switchedAt: new Date(),
-    });
+    // 🔹 PUSH OLD MENTOR HISTORY
+    const oldMentor = await Mentor.findById(oldMentorId);
 
-    // -------------------------------
-    // 6️⃣ UPDATE BOOKING FOR NEW TEACHER
-    // -------------------------------
+    const oldMentorClasses =
+      classesCompleted -
+      booking.teacherHistory.reduce((s, h) => s + h.classesTaken, 0);
+
+    if (oldMentorClasses > 0) {
+      booking.teacherHistory.push({
+        teacherId: oldMentorId,
+        fullName: oldMentor.fullName,
+        phone: oldMentor.phone,
+        perClassPrice: oldPerClass,
+        classesTaken: oldMentorClasses,
+        amountToPay: oldMentorClasses * oldPerClass,
+        switchedAt: new Date(),
+      });
+    }
+
+    // 🔹 UPDATE BOOKING
     booking.mentor = newTeacherId;
-    booking.duration = finalNewDuration + completedClasses;       // UPDATED DURATION  
+    booking.currentPerClassPrice = newPerClass;
+    booking.remainingClasses = remainingClasses;
 
     await booking.save();
 
     res.json({
       success: true,
-      message: "Teacher switched successfully",
-      previousTeacher: {
-        completedClasses,
-        consumedAmount
-      },
-      newTeacher: {
-        newTeacherId,
-        perClassNew,
-        newDuration: finalNewDuration
-      },
-      remainingAmount
+      remainingMoney,
+      remainingClasses,
+      newPerClass,
     });
 
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ success: false, message: err.message });
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
+
 
 
 

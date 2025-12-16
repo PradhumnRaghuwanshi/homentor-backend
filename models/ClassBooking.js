@@ -7,8 +7,8 @@ const teacherHistorySchema = new mongoose.Schema({
     ref: "Mentor",
     required: true,
   },
-  fullName : {type : String},
-  phone: {type: Number},
+  fullName: { type: String },
+  phone: { type: Number },
   perClassPrice: {
     type: Number,
     required: true,
@@ -49,7 +49,7 @@ const classBookingSchema = new mongoose.Schema({
   scheduledTime: { type: String },
   duration: { type: String, default: "22" },
   price: { type: Number, required: true },
-  commissionPrice : {type: Number},
+  commissionPrice: { type: Number },
   rating: { type: Number, min: 1, max: 5 },
   createdAt: { type: Date, default: Date.now },
   studentName: { type: String },
@@ -66,13 +66,20 @@ const classBookingSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-// NEW → Tracks all teachers who taught this booking
+  // NEW → Tracks all teachers who taught this booking
   teacherHistory: [teacherHistorySchema],
   mentorCompletion: {
     type: Boolean,
     default: false
   },
-
+  currentPerClassPrice: {
+    type: Number,
+    // required: true
+  },
+  remainingClasses: {
+    type: Number,
+    // required: true
+  },
   adminApproved: {
     type: Boolean,
     default: false
@@ -86,7 +93,7 @@ const classBookingSchema = new mongoose.Schema({
   feedback: { type: String },
   isDemo: { type: Boolean, default: false },
   demoStatus: { type: String, default: "not-demo" },
-  sessionContinued : {type: Boolean, default : "false"}
+  sessionContinued: { type: Boolean, default: "false" }
 
 });
 
