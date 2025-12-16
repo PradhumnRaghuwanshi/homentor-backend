@@ -309,12 +309,12 @@ router.post("/:id/change-teacher", async (req, res) => {
   try {
     console.log("CHANGE TEACHER PAYLOAD:", req.body);
 
-    const { newTeacherId, newTeacherMonthlyPrice } = req.body;
+    const { newTeacherId, newTeacherPrice } = req.body;
 
-    if (!newTeacherId || !newTeacherMonthlyPrice) {
+    if (!newTeacherId || !newTeacherPrice) {
       return res.status(400).json({
         success: false,
-        message: "newTeacherId and newTeacherMonthlyPrice are required",
+        message: "newTeacherId and newTeacherPrice are required",
       });
     }
 
@@ -367,7 +367,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     const moneyConsumedSoFar = historyMoney + currentMentorAmount;
     const remainingMoney = Math.max(netAmount - moneyConsumedSoFar, 0);
 
-    const newPerClassPrice = Number(newTeacherMonthlyPrice) / 22;
+    const newPerClassPrice = Number(newTeacherPrice) / 22;
 
     if (!newPerClassPrice || isNaN(newPerClassPrice)) {
       throw new Error("Invalid new teacher monthly price");
