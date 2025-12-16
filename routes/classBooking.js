@@ -400,6 +400,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     booking.mentor = newTeacherId;
     booking.currentPerClassPrice = newPerClassPrice;
     booking.remainingClasses = remainingClasses;
+    booking.duration = remainingClasses + totalClassesCompleted
 
     console.log("FINAL BOOKING UPDATE:", {
       mentor: booking.mentor,
