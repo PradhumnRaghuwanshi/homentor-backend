@@ -111,6 +111,8 @@ router.get('/verify-order/:id', async (req, res) => {
             } 
             else if (oldOrder.classBookig){
                 let oldClassBooking = await ClassBooking.findById(oldOrder.classBookig)
+                oldBooking.sessionContinued = true
+
                 let newBooking = new ClassBooking({
                     mentor: oldOrder.mentor._id,
                     price: oldOrder.amount,
@@ -130,7 +132,7 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledDate = oldClassBooking.scheduledDate
                 newBooking.subject = oldClassBooking.subject
                 newBooking.demoStatus = "session_continued",
-               
+                await oldBooking.save()
                 await newBooking.save()
 
             }  else {
