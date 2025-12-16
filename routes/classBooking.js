@@ -307,6 +307,8 @@ router.post("/:id/terminate", async (req, res) => {
 
 router.post("/:id/change-teacher", async (req, res) => {
   try {
+    console.log("CHANGE TEACHER PAYLOAD:", req.body);
+
     const { newTeacherId, newTeacherMonthlyPrice } = req.body;
 
     if (!newTeacherId || !newTeacherMonthlyPrice) {
@@ -317,6 +319,7 @@ router.post("/:id/change-teacher", async (req, res) => {
     }
 
     const booking = await ClassBooking.findById(req.params.id);
+
     if (!booking) {
       return res.status(404).json({
         success: false,
@@ -324,18 +327,21 @@ router.post("/:id/change-teacher", async (req, res) => {
       });
     }
 
+    console.log("BOOKING FOUND:", booking._id);
+
     const MINUTES_PER_CLASS = 60;
 
-    // 🔹 TOTAL NET AMOUNT (AFTER COMMISSION)
-    const netAmount = Number(booking.price || 0) - Number(booking.commissionPrice || 0);
+    const price = Number(booking.price || 0);
+    const commission = Number(booking.commissionPrice || 0);
+    const netAmount = price - commission;
 
-    // 🔹 TOTAL MINUTES COMPLETED
     const totalMinutesCompleted = Number(booking.progress || 0);
+    const totalClassesCompleted = Math.floor(
+      totalMinutesCompleted / MINUTES_PER_CLASS
+    );
 
-    // 🔹 TOTAL CLASSES COMPLETED
-    const totalClassesCompleted = Math.floor(totalMinutesCompleted / MINUTES_PER_CLASS);
+    console.log("CLASSES COMPLETED:", totalClassesCompleted);
 
-    // 🔹 HISTORY TOTALS
     const historyClasses = booking.teacherHistory.reduce(
       (sum, h) => sum + Number(h.classesTaken || 0),
       0
@@ -346,39 +352,38 @@ router.post("/:id/change-teacher", async (req, res) => {
       0
     );
 
-    // 🔹 CURRENT MENTOR CLASSES (NOT YET SETTLED)
     const currentMentorClasses = Math.max(
       totalClassesCompleted - historyClasses,
       0
     );
 
-    const oldPerClassPrice = Number(booking.currentPerClassPrice || 0);
-    const currentMentorAmount = currentMentorClasses * oldPerClassPrice;
+    const oldPerClassPrice = Number(booking.currentPerClassPrice);
 
-    // 🔹 TOTAL MONEY USED
-    const moneyConsumedSoFar = historyMoney + currentMentorAmount;
-
-    // 🔹 REMAINING MONEY
-    const remainingMoney = Math.max(netAmount - moneyConsumedSoFar, 0);
-
-    // 🔹 NEW MENTOR PRICE
-    const newPerClassPrice = Number(newTeacherMonthlyPrice) / 22;
-
-    if (newPerClassPrice <= 0 || isNaN(newPerClassPrice)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid new teacher price",
-      });
+    if (!oldPerClassPrice || isNaN(oldPerClassPrice)) {
+      throw new Error("currentPerClassPrice is missing or invalid");
     }
 
-    // 🔹 REMAINING CLASSES FOR NEW MENTOR
+    const currentMentorAmount = currentMentorClasses * oldPerClassPrice;
+    const moneyConsumedSoFar = historyMoney + currentMentorAmount;
+    const remainingMoney = Math.max(netAmount - moneyConsumedSoFar, 0);
+
+    const newPerClassPrice = Number(newTeacherMonthlyPrice) / 22;
+
+    if (!newPerClassPrice || isNaN(newPerClassPrice)) {
+      throw new Error("Invalid new teacher monthly price");
+    }
+
     const remainingClasses = Math.max(
       Math.floor(remainingMoney / newPerClassPrice),
       1
     );
 
-    // 🔹 SAVE OLD MENTOR HISTORY (ONLY ONCE)
+    // 🔹 PUSH OLD MENTOR HISTORY
     if (currentMentorClasses > 0) {
+      if (!Mentor) {
+        throw new Error("Mentor model not imported");
+      }
+
       const oldMentor = await Mentor.findById(booking.mentor);
 
       booking.teacherHistory.push({
@@ -392,14 +397,19 @@ router.post("/:id/change-teacher", async (req, res) => {
       });
     }
 
-    // 🔹 UPDATE BOOKING FOR NEW MENTOR
     booking.mentor = newTeacherId;
     booking.currentPerClassPrice = newPerClassPrice;
     booking.remainingClasses = remainingClasses;
 
+    console.log("FINAL BOOKING UPDATE:", {
+      mentor: booking.mentor,
+      currentPerClassPrice: booking.currentPerClassPrice,
+      remainingClasses,
+    });
+
     await booking.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Teacher changed successfully",
       summary: {
@@ -412,10 +422,14 @@ router.post("/:id/change-teacher", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Change teacher error:", error);
-    res.status(500).json({
+    console.error("❌ CHANGE TEACHER ERROR");
+    console.error(error.message);
+    console.error(error.stack);
+    console.error(error.errors || "No mongoose validation errors");
+
+    return res.status(500).json({
       success: false,
-      message: "Server error while changing teacher",
+      message: error.message || "Internal Server Error",
     });
   }
 });
