@@ -254,7 +254,7 @@ router.post("/:id/mentor-complete", async (req, res) => {
     const remaining = totalClasses - completed;
 
     // ❌ If classes are not fully completed
-    if (remaining > 0) {
+    if (remaining > 0 && booking.isDemo) {
       return res.status(400).json({
         success: false,
         message: `${remaining} classes are remaining`,
