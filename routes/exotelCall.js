@@ -72,11 +72,10 @@ router.post("/call", async (req, res) => {
     const {
       mentorNumber,
       parentNumber,
-      virtualNumber,
       bookingId
     } = req.body;
 
-    if (!mentorNumber || !parentNumber || !virtualNumber) {
+    if (!mentorNumber || !parentNumber) {
       return res.status(400).json({
         success: false,
         message: "mentorNumber, parentNumber and virtualNumber are required"
@@ -86,7 +85,7 @@ router.post("/call", async (req, res) => {
     const result = await makeOutgoingCall({
       fromNumber: mentorNumber,
       toNumber: parentNumber,
-      virtualNumber,
+      virtualNumber : "+917314852387",
       customField: bookingId,
       statusCallbackUrl: "https://yourdomain.com/api/exotel/callback"
     });
