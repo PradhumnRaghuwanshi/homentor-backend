@@ -7,7 +7,7 @@ const sendWhatsappMessage = async ({ to, message, customData }) => {
     const ACCOUNT_SID = process.env.EXOTEL_ACCOUNT_SID;
     const SUBDOMAIN = "api.exotel.com"; // Mumbai cluster
 
-    const url = `https://${API_KEY}:${API_TOKEN}${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/messagesCopy`;
+    const url = `https://${API_KEY}:${API_TOKEN}@${SUBDOMAIN}/v2/accounts/${ACCOUNT_SID}/isv`;
 
     const payload = {
       custom_data: customData || "",
