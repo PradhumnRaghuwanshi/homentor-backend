@@ -22,6 +22,8 @@ app.use("/api/margin-rule", require("./routes/marginRule.js"));
 app.use("/api/demo-booking", require("./routes/demoBookingRoutes.js"));
 app.use('/api/notification', require("./routes/notification.js"))
 
+app.use("/api/exotel", require("./routes/exotelCall.js"));
+
 
 const PORT = 5000;
 app.listen(PORT, () => {
