@@ -114,7 +114,7 @@ router.post("/callback", (req, res) => {
   res.sendStatus(200);
 });
 
-router.post("/get-mentor-number", async (req, res) => {
+router.get("/get-mentor-number", async (req, res) => {
 
   console.log("Full body:", req.body);
 
