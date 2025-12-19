@@ -140,7 +140,7 @@ router.get("/get-mentor-number", async (req, res) => {
   // Find latest intent (within 5 minutes)
   const intent = await CallIntent.findOne({
     
-    parentNumber,
+    parentPhone: parentNumber,
     createdAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) }
   }).sort({ createdAt: -1 });
   console.log(intent)
