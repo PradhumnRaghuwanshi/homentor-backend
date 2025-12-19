@@ -4,23 +4,28 @@ const sendWhatsappMessage = require("../utils/sendWhatsapp");
 
 router.post("/send-whatsapp", async (req, res) => {
   try {
-    const { phone, message } = req.body;
+    const { phone, studentName, mentorName, date, time } = req.body;
 
     await sendWhatsappMessage({
-      to: phone,
-      message: message,
-      customData: "booking_notification"
+      to: phone, // +91XXXXXXXXXX
+      templateName: "booking", // 👈 must match Exotel approved template
+      bodyParams: [
+        studentName,
+        mentorName,
+        date,
+        time,
+      ],
     });
 
     res.json({
       success: true,
-      message: "WhatsApp message sent successfully"
+      message: "WhatsApp template message sent successfully",
     });
-
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Failed to send WhatsApp message"
+      message: "Failed to send WhatsApp message",
     });
   }
 });
