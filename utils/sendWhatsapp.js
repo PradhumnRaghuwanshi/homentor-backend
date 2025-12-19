@@ -1,76 +1,81 @@
-const axios = require("axios");
-const qs = require("qs");
+const https = require("follow-redirects").https;
+const qs = require("querystring");
 
-const sendWhatsappMessage = async ({
+const sendWhatsappMessage = ({
   to,
   templateName,
   bodyParams = [],
+  customData = "booking_notification",
 }) => {
-  try {
+  return new Promise((resolve, reject) => {
     const ACCOUNT_SID = process.env.EXOTEL_ACCOUNT_SID;
     const API_KEY = process.env.EXOTEL_API_KEY;
     const API_TOKEN = process.env.EXOTEL_API_TOKEN;
 
-    // ✅ Mumbai cluster (IMPORTANT)
-    const BASE_URL = "https://api.exotel.com";
-
-    const url = `${BASE_URL}/v2/accounts/${ACCOUNT_SID}/messages`;
-
-    // ✅ Exotel expects FORM DATA (not JSON)
-    const data = qs.stringify({
-      From: "15557588278", // 👈 your Exotel approved WhatsApp number
-      To: `whatsapp:${to}`,
-      TemplateName: "booking",
-      TemplateParams: JSON.stringify(bodyParams),
-    });
-
-    const payload = {
-    whatsapp: {
-      messages: [
-        {
-          from: "15557588278",   // ✅ APPROVED WA NUMBER
-          to: to, // 9196XXXXXXXX
-          content: {
-            type: "template",
-            
-            template: {
-              name: templateName,
-              namespace: "ac5ce04e_736b_4686_b06a_0543e823d898",
-              language: { code: "en", "policy": "deterministic" },
-              components: [
-                {
-                  type: "body",
-                  parameters: bodyParams.map((text) => ({
-                    type: "text",
-                    text,
-                  })),
-                },
-              ],
-            },
-          },
-        },
-      ],
-    },
-  };
-
-    const response = await axios.post(url, payload, {
-      auth: {
-        username: API_KEY,
-        password: API_TOKEN,
-      },
+    const options = {
+      method: "POST",
+      hostname: "api.exotel.com", // ✅ Singapore cluster
+      path: `/v2/accounts/${ACCOUNT_SID}/messages`,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(`${API_KEY}:${API_TOKEN}`).toString("base64"),
       },
+      maxRedirects: 20,
+    };
+
+    // ✅ Exact payload as per Exotel documentation
+    const postData = qs.stringify({
+      custom_data: customData,
+      whatsapp: JSON.stringify({
+        messages: [
+          {
+            from: "15557588278", // ✅ Exotel-approved WA number
+            to: to, // 919XXXXXXXXX
+            content: {
+              type: "template",
+              template: {
+                name: templateName,
+                namespace: "ac5ce04e_736b_4686_b06a_0543e823d898", // ✅ from Exotel
+                language: {
+                  policy: "deterministic",
+                  code: "en",
+                },
+                components: [
+                  {
+                    type: "body",
+                    parameters: bodyParams.map((text) => ({
+                      type: "text",
+                      text,
+                    })),
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }),
     });
 
-    return response.data;
-  } catch (error) {
-    console.error(
-      "WhatsApp Template Error:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
+    const req = https.request(options, (res) => {
+      let chunks = [];
+
+      res.on("data", (chunk) => chunks.push(chunk));
+
+      res.on("end", () => {
+        const body = Buffer.concat(chunks).toString();
+        resolve(JSON.parse(body));
+      });
+
+      res.on("error", (err) => reject(err));
+    });
+
+    req.on("error", (err) => reject(err));
+
+    req.write(postData);
+    req.end();
+  });
 };
 
 module.exports = sendWhatsappMessage;
