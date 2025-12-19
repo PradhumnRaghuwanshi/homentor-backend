@@ -6,7 +6,7 @@ router.post("/send-whatsapp", async (req, res) => {
   try {
     const { phone, studentName, mentorName, date, time } = req.body;
 
-    await sendWhatsappMessage({
+    const response =  await sendWhatsappMessage({
       to: phone, // +91XXXXXXXXXX
       templateName: "booking", // 👈 EXACT template name from Exotel
       bodyParams: [
@@ -19,6 +19,7 @@ router.post("/send-whatsapp", async (req, res) => {
 
     res.json({
       success: true,
+      data : response,
       message: "WhatsApp template message sent successfully",
     });
   } catch (error) {
