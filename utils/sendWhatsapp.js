@@ -30,7 +30,7 @@ const sendWhatsappMessage = ({
         messages: [
           {
             from: "15557588278",
-            to: to,
+            to: "whatsapp:918878084604",
             content: {
               type: "template",
               template: {
