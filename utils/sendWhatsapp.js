@@ -32,8 +32,10 @@ const sendWhatsappMessage = async ({
           to: to, // 9196XXXXXXXX
           content: {
             type: "template",
+            
             template: {
               name: templateName,
+              namespace: "ac5ce04e_736b_4686_b06a_0543e823d898",
               language: { code: "en" },
               components: [
                 {
