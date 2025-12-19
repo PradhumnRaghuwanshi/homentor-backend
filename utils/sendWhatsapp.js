@@ -24,7 +24,34 @@ const sendWhatsappMessage = async ({
       TemplateParams: JSON.stringify(bodyParams),
     });
 
-    const response = await axios.post(url, data, {
+    const payload = {
+    whatsapp: {
+      messages: [
+        {
+          from: "15557588278",   // ✅ APPROVED WA NUMBER
+          to: to.replace("+", ""), // 9196XXXXXXXX
+          content: {
+            type: "template",
+            template: {
+              name: templateName,
+              language: { code: "en" },
+              components: [
+                {
+                  type: "body",
+                  parameters: bodyParams.map((text) => ({
+                    type: "text",
+                    text,
+                  })),
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+  };
+
+    const response = await axios.post(url, payload, {
       auth: {
         username: API_KEY,
         password: API_TOKEN,
