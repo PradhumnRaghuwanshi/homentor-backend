@@ -14,41 +14,33 @@ const sendWhatsappMessage = ({
 
     const options = {
       method: "POST",
-      hostname: "api.exotel.com", // ✅ Singapore cluster
+      hostname: "api.exotel.com", // Singapore cluster
       path: `/v2/accounts/${ACCOUNT_SID}/messages`,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization:
-          "Basic " +
-          Buffer.from(`${API_KEY}:${API_TOKEN}`).toString("base64"),
+          "Basic " + Buffer.from(`${API_KEY}:${API_TOKEN}`).toString("base64"),
       },
       maxRedirects: 20,
     };
 
-    // ✅ Exact payload as per Exotel documentation
     const postData = qs.stringify({
       custom_data: customData,
       whatsapp: JSON.stringify({
         messages: [
           {
-            from: "15557588278", // ✅ Exotel-approved WA number
-            to: to, // 919XXXXXXXXX
+            from: "15557588278",
+            to: to,
             content: {
               type: "template",
               template: {
                 name: templateName,
-                namespace: "ac5ce04e_736b_4686_b06a_0543e823d898", // ✅ from Exotel
-                language: {
-                  policy: "deterministic",
-                  code: "en",
-                },
+                namespace: "ac5ce04e_736b_4686_b06a_0543e823d898",
+                language: { policy: "deterministic", code: "en" },
                 components: [
                   {
                     type: "body",
-                    parameters: bodyParams.map((text) => ({
-                      type: "text",
-                      text,
-                    })),
+                    parameters: bodyParams.map((text) => ({ type: "text", text })),
                   },
                 ],
               },
@@ -62,17 +54,19 @@ const sendWhatsappMessage = ({
       let chunks = [];
 
       res.on("data", (chunk) => chunks.push(chunk));
-
       res.on("end", () => {
         const body = Buffer.concat(chunks).toString();
-        resolve(JSON.parse(body));
+        try {
+          // Try parse JSON, fallback to raw text
+          resolve(JSON.parse(body));
+        } catch (err) {
+          resolve({ raw: body });
+        }
       });
-
       res.on("error", (err) => reject(err));
     });
 
     req.on("error", (err) => reject(err));
-
     req.write(postData);
     req.end();
   });
