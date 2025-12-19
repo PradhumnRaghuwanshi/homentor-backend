@@ -18,7 +18,7 @@ const sendWhatsappMessage = async ({
 
     // ✅ Exotel expects FORM DATA (not JSON)
     const data = qs.stringify({
-      From: "whatsapp:+1555758827822", // 👈 your Exotel approved WhatsApp number
+      From: "15557588278", // 👈 your Exotel approved WhatsApp number
       To: `whatsapp:${to}`,
       TemplateName: "booking",
       TemplateParams: JSON.stringify(bodyParams),
