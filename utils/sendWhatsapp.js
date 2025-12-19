@@ -14,7 +14,7 @@ const sendWhatsappMessage = async ({
     // ✅ Mumbai cluster (IMPORTANT)
     const BASE_URL = "https://api.exotel.com";
 
-    const url = `${BASE_URL}/v1/Accounts/${ACCOUNT_SID}/Messages`;
+    const url = `${BASE_URL}/v2/accounts/${ACCOUNT_SID}/messages`;
 
     // ✅ Exotel expects FORM DATA (not JSON)
     const data = qs.stringify({
