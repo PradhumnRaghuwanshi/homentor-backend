@@ -108,10 +108,21 @@ router.post("/call", async (req, res) => {
    ROUTE: STATUS CALLBACK
 =========================== */
 
-router.post("/callback", (req, res) => {
-  console.log("📞 Exotel Callback:");
-  console.log(JSON.stringify(req.body, null, 2));
-  res.sendStatus(200);
+router.post("/call/initiate", async(req, res) => {
+  const { parentPhone, mentorId, mentorPhone } = req.body;
+
+  // Example mentor lookup
+  // const mentor = await Mentor.findById(mentorId);
+
+  // Store mapping (DB or Redis)
+  await CallIntent.create({
+    parentPhone,
+    mentorId,
+    mentorPhone: mentorPhone,
+    createdAt: new Date()
+  });
+
+  res.json({ success: true });
 });
 
 router.get("/get-mentor-number", async (req, res) => {
@@ -125,10 +136,17 @@ router.get("/get-mentor-number", async (req, res) => {
 
   console.log("Parent calling number:", parentNumber);
 
+  // Find latest intent (within 5 minutes)
+  const intent = await CallIntent.findOne({
+    parentPhone,
+    createdAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) }
+  }).sort({ createdAt: -1 });
+
+
   res.set("Content-Type", "text/xml");
   res.send(`
     <Response>
-      <Dial>917748833998</Dial>
+      <Dial>${intent.mentorPhone}</Dial>
     </Response>
   `);
 });
