@@ -29,7 +29,7 @@ const sendWhatsappMessage = async ({
       messages: [
         {
           from: "15557588278",   // ✅ APPROVED WA NUMBER
-          to: to.replace("+", ""), // 9196XXXXXXXX
+          to: to, // 9196XXXXXXXX
           content: {
             type: "template",
             template: {
