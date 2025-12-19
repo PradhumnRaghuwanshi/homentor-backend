@@ -114,4 +114,24 @@ router.post("/callback", (req, res) => {
   res.sendStatus(200);
 });
 
+router.post("/get-mentor-number", async (req, res) => {
+
+  console.log("Full body:", req.body);
+
+  const parentNumber =
+    req.body.From ||        // Exotel POST
+    req.query.From ||       // Sometimes via query
+    req.body.from;
+
+  console.log("Parent calling number:", parentNumber);
+
+  res.set("Content-Type", "text/xml");
+  res.send(`
+    <Response>
+      <Dial>917748833998</Dial>
+    </Response>
+  `);
+});
+
+
 module.exports = router;
