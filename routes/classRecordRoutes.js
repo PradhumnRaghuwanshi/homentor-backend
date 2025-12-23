@@ -16,7 +16,7 @@ router.get("/class-booking/:id", async (req, res) => {
   try {
     const classRecords = await ClassRecord.find({
         classBooking : req.params.id
-    })
+    }).populate("mentor", "fullName")
     res.status(200).json({ data: classRecords });
   } catch (error) {
     res.status(500).json({ message: "Server error" });

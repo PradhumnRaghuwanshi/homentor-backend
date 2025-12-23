@@ -265,6 +265,7 @@ router.post("/:id/mentor-complete", async (req, res) => {
     booking.mentorCompletion = !booking.mentorCompletion;
     if (booking.demoStatus == "running") {
       booking.demoStatus = "completed"
+      
     }
 
     await booking.save();
