@@ -40,6 +40,7 @@ const MentorSchema = new mongoose.Schema({
         panNumber: String,
         bankAccount:Number,
         ifsc: String,
+        accountHolderName: String,
   location: {
     area: String,
     city: String,
