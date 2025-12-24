@@ -1,25 +1,18 @@
 const mongoose = require("mongoose");
+const { stringify } = require("qs");
 
 const MentorSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
-  email: {
-    type: String,
-  },
-  phone: {
-    type: String,
-  },
-  gender: {
-    type: String,
-  },
-  age: {
-    type: Number,
-  },
-  profilePhoto: {
-    type: String,
-  },
-  mentorId: String,
+  email: { type: String },
+  phone: { type: String, required: true},
+  gender: {type: String},
+  age: { type: Number},
+  profilePhoto: { type: String},
   teachingVideo: String,
   cv: String,
+  aadharPhoto: String,
+  panPhoto: String,
+  marksheet : String,
   qualifications: {
     highestQualification: String,
     specialization: String,
@@ -32,12 +25,21 @@ const MentorSchema = new mongoose.Schema({
   graduation: {
     degree: String,
     college: String,
+    specialization:String,
+    graduationYear: Number
   },
+  otherGraduationDegree: String,
   postGraduation: {
     degree: String,
     college: String,
   },
-  experience: String,
+  alternatePhone: Number,
+        referenceContact: Number,
+        permanentAddress: String,
+        temporaryAddress: String,
+        panNumber: String,
+        bankAccount:Number,
+        ifsc: String,
   location: {
     area: String,
     city: String,
@@ -45,9 +47,7 @@ const MentorSchema = new mongoose.Schema({
     lat: Number,
     lon: Number,
   },
-  experience: {
-    type: String, // in years
-  },
+  experience: { type: String},
   experienceDisplay: {
     type: Boolean,
     default: false,
