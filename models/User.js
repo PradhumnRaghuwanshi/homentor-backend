@@ -4,7 +4,9 @@ const userSchema = new mongoose.Schema({
   phone: Number,
   address : {
     type: Object
-  }
+  },
+  parentName: String,
+  children: Array
 
 }, { timestamps: true });
 

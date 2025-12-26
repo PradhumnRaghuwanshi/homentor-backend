@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { stringify } = require("qs");
 
 const MentorSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
