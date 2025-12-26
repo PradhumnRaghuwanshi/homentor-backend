@@ -29,21 +29,14 @@ const sendWhatsappMessage = ({
       whatsapp: JSON.stringify({
         messages: [
           {
-            from: "15557588278",
-            to: "whatsapp:918878084604",
+            from: "+15557588278",
+            to: "+918878084604",
             content: {
-              type: "template",
-              template: {
-                name: templateName,
-                namespace: "ac5ce04e_736b_4686_b06a_0543e823d898",
-                language: { policy: "deterministic", code: "en" },
-                components: [
-                  {
-                    type: "body",
-                    parameters: bodyParams.map((text) => ({ type: "text", text })),
-                  },
-                ],
-              },
+              recepient_type: "individual"
+              type: "text",
+              text : {
+                body: "Hello"
+              }
             },
           },
         ],
