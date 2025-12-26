@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require ("mongoose");
 
 const disclaimerSchema = new mongoose.Schema(
   {
@@ -16,4 +16,4 @@ const disclaimerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Disclaimer", disclaimerSchema);
+module.exports =  mongoose.model("Disclaimer", disclaimerSchema);

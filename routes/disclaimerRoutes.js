@@ -7,7 +7,7 @@ const router = express.Router();
    ADMIN ROUTES
 ======================= */
 
-// Create disclaimer
+
 router.post("/", async (req, res) => {
   try {
     const disclaimer = await Disclaimer.create(req.body);
