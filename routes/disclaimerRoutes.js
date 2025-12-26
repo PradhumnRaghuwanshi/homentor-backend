@@ -43,7 +43,7 @@ router.delete("/:id", async (req, res) => {
 
 // Get disclaimer by audience
 router.get("/:audience", async (req, res) => {
-  const disclaimer = await Disclaimer.findOne({
+  const disclaimer = await Disclaimer.find({
     audience: req.params.audience,
   });
   res.json({ success: true, data: disclaimer });
