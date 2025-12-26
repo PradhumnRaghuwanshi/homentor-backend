@@ -32,7 +32,7 @@ const sendWhatsappMessage = ({
             from: "+15557588278",
             to: "+918878084604",
             content: {
-              recepient_type: "individual"
+              recepient_type: "individual",
               type: "text",
               text : {
                 body: "Hello"
