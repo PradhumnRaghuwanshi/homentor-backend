@@ -185,6 +185,19 @@ router.get("/student/:id", async (req, res) => {
   }
 });
 
+router.get("/parent/:id", async (req, res) => {
+  try {
+    const booking = await ClassBooking.find({
+      parent: req.params.id
+    }).populate("mentor", "fullName profilePhoto phone teachingModes backupTeachers").sort({ createdAt: -1 });;
+    if (!booking)
+      return res.status(404).json({ success: false, message: "Not found" });
+    res.status(200).json({ success: true, data: booking });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
 // DELETE a booking by ID
 router.delete("/:id", async (req, res) => {
   try {
