@@ -25,8 +25,9 @@ const sendWhatsappMessage = ({
     };
 
     const postData = qs.stringify({
-      custom_data: customData,
-      whatsapp: JSON.stringify({
+      custom_data: "ORDER123456",
+      status_callback: "https://eoj72flq0lwx2gs.m.pipedream.net/",
+      whatsapp: JSON.stringify({    
         messages: [
           {
             from: "+15557588278",
@@ -58,7 +59,7 @@ const sendWhatsappMessage = ({
       });
       res.on("error", (err) => reject(err));
     });
-
+    console.log(req)
     req.on("error", (err) => reject(err));
     req.write(postData);
     req.end();
