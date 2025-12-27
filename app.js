@@ -22,6 +22,7 @@ app.use("/api/margin-rule", require("./routes/marginRule.js"));
 app.use("/api/demo-booking", require("./routes/demoBookingRoutes.js"));
 app.use('/api/notification', require("./routes/notification.js"))
 app.use('/api/disclaimer', require("./routes/disclaimerRoutes.js"))
+app.use('/api/mentor-leads', require("./routes/mentorLeadRoutes.js"))
 
 app.use("/api/exotel", require("./routes/exotelCall.js"));
 
