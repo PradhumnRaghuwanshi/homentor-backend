@@ -46,6 +46,19 @@ const mentorLeadSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    teachingPreferences: {
+      type: Object
+    },
+
+    teachingExperience: {
+      type : String
+    },
+    
+    urgentlyNeeded: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
