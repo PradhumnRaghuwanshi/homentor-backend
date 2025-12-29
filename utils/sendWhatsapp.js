@@ -1,83 +1,60 @@
-const https = require("follow-redirects").https;
-const qs = require("querystring");
+const axios = require("axios");
 
-const sendWhatsappMessage = ({
+async function sendWhatsappTemplate({
   to,
   templateName,
   bodyParams = [],
   customData = "booking_notification",
-}) => {
-  return new Promise((resolve, reject) => {
-    const ACCOUNT_SID = process.env.EXOTEL_ACCOUNT_SID;
-    const API_KEY = process.env.EXOTEL_API_KEY;
-    const API_TOKEN = process.env.EXOTEL_API_TOKEN;
+}) {
+  const ACCOUNT_SID = process.env.EXOTEL_ACCOUNT_SID;
+  const API_KEY = process.env.EXOTEL_API_KEY;
+  const API_TOKEN = process.env.EXOTEL_API_TOKEN;
 
-    const options = {
-      method: "POST",
-      hostname: "api.exotel.com", // Singapore cluster
-      path: `/v2/accounts/${ACCOUNT_SID}/messages`,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization:
-          "Basic " + Buffer.from(`${API_KEY}:${API_TOKEN}`).toString("base64"),
-      },
-      maxRedirects: 20,
-    };
+  const url = `https://api.exotel.com/v2/accounts/${ACCOUNT_SID}/messages`;
 
-    const postData = qs.stringify({
-      custom_data: "ORDER123456",
-      status_callback: "https://eoj72flq0lwx2gs.m.pipedream.net/",
-      whatsapp: JSON.stringify({
-        messages: [
-          {
-            from: "+15557867037",
-            to: "+918878084604",
-            content: {
-              type: "template",
-              template: {
-                name: "booking",
-                language: {
-                  policy: "deterministic",
-                  code: "en"
+  const payload = {
+    custom_data: customData,
+    whatsapp: {
+      messages: [
+        {
+          from: "+15557867037", // Approved WhatsApp number
+          to : "918878084604",
+          content: {
+            type: "template",
+            template: {
+              name: "booking",
+              language: {
+                policy: "deterministic",
+                code: "en",
+              },
+              components: [
+                {
+                  type: "body",
+                  parameters: bodyParams.map((text) => ({
+                    type: "text",
+                    text,
+                  })),
                 },
-                components: [
-                  {
-                    type: "body",
-                    parameters: [
-                      {
-                        "type": "text",
-                        "text": "Jessica"
-                      }
-                    ]
-                  }
-                ]
-              }
+              ],
             },
           },
-        ],
-      }),
-    });
+        },
+      ],
+    },
+  };
 
-    const req = https.request(options, (res) => {
-      let chunks = [];
-
-      res.on("data", (chunk) => chunks.push(chunk));
-      res.on("end", () => {
-        const body = Buffer.concat(chunks).toString();
-        try {
-          // Try parse JSON, fallback to raw text
-          resolve(JSON.parse(body));
-        } catch (err) {
-          resolve({ raw: body });
-        }
-      });
-      res.on("error", (err) => reject(err));
-    });
-    console.log(req)
-    req.on("error", (err) => reject(err));
-    req.write(postData);
-    req.end();
+  const response = await axios.post(url, payload, {
+    auth: {
+      username: API_KEY,
+      password: API_TOKEN,
+    },
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-};
 
-module.exports = sendWhatsappMessage;
+  return response.data;
+}
+
+module.exports = sendWhatsappTemplate;
+
