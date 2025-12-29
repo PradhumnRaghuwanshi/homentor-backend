@@ -10,6 +10,10 @@ async function sendWhatsappTemplate({
   const API_KEY = process.env.EXOTEL_API_KEY;
   const API_TOKEN = process.env.EXOTEL_API_TOKEN;
 
+  if (!ACCOUNT_SID || !API_KEY || !API_TOKEN) {
+    throw new Error("Exotel credentials missing");
+  }
+
   const url = `https://api.exotel.com/v2/accounts/${ACCOUNT_SID}/messages`;
 
   const payload = {
@@ -17,12 +21,12 @@ async function sendWhatsappTemplate({
     whatsapp: {
       messages: [
         {
-          from: "+15557867037", // Approved WhatsApp number
-          to : "918878084604",
+          from: "15557867037", // ✅ NO PLUS SIGN
+          to: "919630709988",              // ✅ dynamic number
           content: {
             type: "template",
             template: {
-              name: "booking",
+              name: "booking", // ✅ dynamic template
               language: {
                 policy: "deterministic",
                 code: "en",
@@ -32,7 +36,7 @@ async function sendWhatsappTemplate({
                   type: "body",
                   parameters: bodyParams.map((text) => ({
                     type: "text",
-                    text,
+                    text: String(text),
                   })),
                 },
               ],
@@ -43,18 +47,30 @@ async function sendWhatsappTemplate({
     },
   };
 
-  const response = await axios.post(url, payload, {
-    auth: {
-      username: API_KEY,
-      password: API_TOKEN,
-    },
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    const response = await axios.post(url, payload, {
+      auth: {
+        username: API_KEY,
+        password: API_TOKEN,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    console.error("❌ Exotel Error:");
+
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", JSON.stringify(error.response.data, null, 2));
+    } else {
+      console.error(error.message);
+    }
+
+    throw error;
+  }
 }
 
 module.exports = sendWhatsappTemplate;
-
