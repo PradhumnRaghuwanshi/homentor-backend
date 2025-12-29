@@ -27,16 +27,30 @@ const sendWhatsappMessage = ({
     const postData = qs.stringify({
       custom_data: "ORDER123456",
       status_callback: "https://eoj72flq0lwx2gs.m.pipedream.net/",
-      whatsapp: JSON.stringify({    
+      whatsapp: JSON.stringify({
         messages: [
           {
-            from: "+15557588278",
+            from: "+15557867037",
             to: "+918878084604",
             content: {
-              recepient_type: "individual",
-              type: "text",
-              text : {
-                body: "Hello"
+              type: "template",
+              template: {
+                name: "booking",
+                language: {
+                  policy: "deterministic",
+                  code: "en"
+                },
+                components: [
+                  {
+                    type: "body",
+                    parameters: [
+                      {
+                        "type": "text",
+                        "text": "Jessica"
+                      }
+                    ]
+                  }
+                ]
               }
             },
           },
