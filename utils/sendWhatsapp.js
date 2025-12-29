@@ -21,7 +21,7 @@ async function sendWhatsappTemplate({
     whatsapp: {
       messages: [
         {
-          from: "+15557943146", // ✅ NO PLUS SIGN
+          from: "9115557943146", // ✅ NO PLUS SIGN
           to: "919630709988",              // ✅ dynamic number
           content: {
             type: "template",
