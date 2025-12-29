@@ -235,11 +235,28 @@ router.post("/batch", async (req, res) => {
 // POST new mentor
 router.post("/", async (req, res) => {
   try {
+    // ✅ 1. Normalize mobile number (last 10 digits only)
+    if (req.body.phone) {
+      const digitsOnly = req.body.phone.replace(/\D/g, "");
+      req.body.phone = digitsOnly.slice(-10);
+    }
     const mentor = new Mentor(req.body);
-    // Inside mentor signup controller
-    mentor.teachingModes.homeTuition.margin = mentor.teachingModes.homeTuition.monthlyPrice <= 5000 ? 500 : 1000;
 
-    mentor.teachingModes.homeTuition.finalPrice = mentor.teachingModes.homeTuition.monthlyPrice + mentor.teachingModes.homeTuition.margin;
+    // ✅ 2. Handle monthlyPrice safely (allow empty)
+    const monthlyPrice =
+      mentor.teachingModes?.homeTuition?.monthlyPrice;
+
+    if (typeof monthlyPrice === "number") {
+      mentor.teachingModes.homeTuition.margin =
+        monthlyPrice <= 5000 ? 500 : 1000;
+
+      mentor.teachingModes.homeTuition.finalPrice =
+        monthlyPrice + mentor.teachingModes.homeTuition.margin;
+    } else {
+      // If monthlyPrice not provided
+      mentor.teachingModes.homeTuition.margin = 0;
+      mentor.teachingModes.homeTuition.finalPrice = 0;
+    }
     const newMentor = await mentor.save();
     res.status(201).json({ data: newMentor });
   } catch (error) {
