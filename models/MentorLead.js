@@ -58,6 +58,10 @@ const mentorLeadSchema = new mongoose.Schema(
     urgentlyNeeded: {
       type: Boolean,
       default: false,
+    },
+    whatsappAdded : {
+      type: Boolean,
+      default: false,
     }
   },
   { timestamps: true }
