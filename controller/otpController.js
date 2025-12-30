@@ -25,9 +25,6 @@ const sendOtp = async (req, res) => {
       }
 
     )
-    const url = `https://control.yourbulksms.com/api/sendhttp.php?authkey=3139656e746f7237303056&mobiles=${phone}&message=YourLogin%20Password%20is%20${otp}%20for%20Homentor.%20Do%20not%20share%20with%20anyone.%20EVOKE&sender=MTNMAR&route=2&country=91&DLT_TE_ID=1707172077746486856`;
-    // `http://control.yourbulksms.com/api/sendhttp.php?authkey=3139656e746f7237303056&mobiles=${req.body.number}&message=YourLogin%20Password%20is%20${otp}%20for%20Homentor.%20Do%20not%20share%20with%20anyone.%20EVOKE&sender=MTNMAR&route=2&country=91&DLT_TE_ID=1707172077746486856`
-
 
     return res.json({ success: true, message: "OTP sent", response: response.data });
   } catch (err) {

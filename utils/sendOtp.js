@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const sendOtp = async (mobileNumber) => {
-  const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLUU0NjQyMThGMjYwMTQ2QSIsImlhdCI6MTc2MjYyNTM3MywiZXhwIjoxOTIwMzA1MzczfQ.6XQqj-ji5vkHQAADUx0b9LrIsuGLkpOS3Lkjr7kox-406p2YU9JXtwYuA7AJY7WmQjB5kHPh7vhpT4Nro9bUHw";
+  const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLTFCODU3MzFFQjE3MzRFNCIsImlhdCI6MTc2Njk5MTAyMCwiZXhwIjoxOTI0NjcxMDIwfQ.x6haO1N2GlLhX-5uEKyP8--QQawjAbwUH6SRKLyuJ18RqmLJG2gA7xuBq-umjSae3mwC0LmirMEiSMZ4s4sbZw";
 
   const url = "https://cpaas.messagecentral.com/verification/v3/send";
   const params = {
