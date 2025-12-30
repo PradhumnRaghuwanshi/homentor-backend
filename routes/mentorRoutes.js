@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Mentor = require("../models/Mentor");
+const MentorLead = require("../models/MentorLead");
 
 router.get("/nearby-mentors", async (req, res) => {
   const { lat, lon, subject, classLevel, rank } = req.query;
@@ -240,6 +241,7 @@ router.post("/", async (req, res) => {
       const digitsOnly = req.body.phone.replace(/\D/g, "");
       req.body.phone = digitsOnly.slice(-10);
     }
+
     const mentor = new Mentor(req.body);
 
     // ✅ 2. Handle monthlyPrice safely (allow empty)
@@ -257,7 +259,16 @@ router.post("/", async (req, res) => {
       mentor.teachingModes.homeTuition.margin = 0;
       mentor.teachingModes.homeTuition.finalPrice = 0;
     }
+
     const newMentor = await mentor.save();
+
+    const mentorLead = await MentorLead.find({
+      phone : req.body.phone
+    }) 
+    if(mentorLead){
+      mentorLead.leadFormFilled = true
+      await mentorLead.save()
+    }
     res.status(201).json({ data: newMentor });
   } catch (error) {
     console.log(error)
