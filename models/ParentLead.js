@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const mentorLeadSchema = new mongoose.Schema(
+const parentLeadSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
@@ -22,47 +22,43 @@ const mentorLeadSchema = new mongoose.Schema(
       lon: Number
     },
 
-    teachingRange: {
+    classes: {
       type: String, 
     },
 
-    bio: {
+    subjects: {
       type: String,
     },
 
-    category: {
-      type: String,
-      enum: ["Premium", "Regular", "Trial"],
-      default: "Regular",
-    },
-
-    fees: {
+    feesBudget: {
       type: Number,
     },
 
-    leadFormFilled: {
-      type: Boolean,
-      default: false,
+    classRequiredDate: {
+      type: Date,
     },
 
-    interviewDone: {
-      type: Boolean,
-      default: false,
+    additionalDetails: {
+      type: String
     },
 
-    teachingPreferences: {
-      type: Object
+    firstInteractionDate: {
+      type: Date
     },
 
-    teachingExperience: {
+    lastInteractionDate: {
+      type: Date
+    },
+
+    school: {
       type : String
     },
     
-    urgentlyNeeded: {
+    isGold : {
       type: Boolean,
       default: false,
     },
-    whatsappAdded : {
+    teacherLink : {
       type: Boolean,
       default: false,
     }
@@ -70,4 +66,4 @@ const mentorLeadSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("MentorLead", mentorLeadSchema);
+module.exports = mongoose.model("ParentLead", parentLeadSchema);
