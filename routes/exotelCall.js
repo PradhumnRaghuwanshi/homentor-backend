@@ -150,6 +150,7 @@ router.get("/get-mentor-number", async (req, res) => {
   })
 
   lead.isCalled = true
+  lead.status = "call_done"
   await lead.save()
   
   console.log(intent)

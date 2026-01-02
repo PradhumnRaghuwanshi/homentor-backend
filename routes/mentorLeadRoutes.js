@@ -31,6 +31,7 @@ router.post("/second-form", async (req, res) => {
     {phone : req.body.phone}
   );
   lead.secondForm = true
+  lead.status = "second_form"
   await lead.save()
   res.json(lead);
 });

@@ -35,6 +35,11 @@ const mentorLeadSchema = new mongoose.Schema(
       enum: ["Premium", "Regular", "Trial"],
       default: "Regular",
     },
+    status: {
+      type: String,
+      enum: ["lead_generated" ,"first_form", "interview", "second_form", "link_send", "call_done", "demo_booked", "paid_booking"],
+      default: "lead_generated",
+    },
 
     fees: {
       type: Number,

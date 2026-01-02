@@ -46,6 +46,7 @@ router.post("/", async (req, res) => {
 
     if(lead){
       lead.demoBooked = true
+      lead.status = "demo_booked"
       await lead.save()
     }
 

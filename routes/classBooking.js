@@ -88,6 +88,7 @@ router.post("/manual-booking", async (req, res) => {
     
       if(lead){
         lead.paidBooked = true
+        lead.status = "paid_booking"
         await lead.save()
       }
     

@@ -266,10 +266,12 @@ router.post("/", async (req, res) => {
     }) 
     if(mentorLead){
       mentorLead.leadFormFilled = true
+      mentorLead.status = "first_form"
       await mentorLead.save()
     } else {
-      const newMentorLead = new MentorLead(req.body)
+      let newMentorLead = new MentorLead(req.body)
       newMentorLead.leadFormFilled = true
+      newMentorLead.status = "first_form"
       await newMentorLead.save()
     }
     res.status(201).json({ data: newMentor });
