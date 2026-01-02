@@ -36,112 +36,149 @@ router.post("/second-form", async (req, res) => {
 });
 
 router.get("/sorted-mentor-leads", async (req, res) => {
-  const { lat, lon, subject, classLevel } = req.query;
+  try {
+    const { lat, lon, subject, classLevel, experience, price } = req.query;
 
-  const adminLat = Number(lat);
-  const adminLon = Number(lon);
+    const adminLat = Number(lat);
+    const adminLon = Number(lon);
+    const reqExperience = Number(experience);
+    const reqPrice = Number(price);
 
-  const mentors = await MentorLead.find();
+    const mentors = await MentorLead.find();
 
-  // Convert teaching range "5km" / "25km+" / "anywhere"
-  function normalizeRange(range) {
-    if (!range) return Infinity;
+    // -----------------------------
+    // RANGE NORMALIZATION
+    // -----------------------------
+    function normalizeRange(range) {
+      if (!range) return Infinity;
 
-    let r = range.toLowerCase();
+      const r = range.toLowerCase();
+      if (r === "anywhere") return Infinity;
+      if (r.endsWith("+")) return parseInt(r);
+      return parseInt(r);
+    }
 
-    if (r === "anywhere") return Infinity;
-    if (r.endsWith("+")) return parseInt(r); // "25km+" → 25
+    // -----------------------------
+    // DISTANCE (HAVERSINE)
+    // -----------------------------
+    function getDistance(lat1, lon1, lat2, lon2) {
+      if (!lat2 || !lon2) return Infinity;
 
-    return parseInt(r); // "5km" → 5
-  }
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
 
-  // Distance calculator (Haversine)
-  function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
 
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) ** 2;
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
 
-    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-  }
+    let enriched = mentors.map((m) => {
+      const distance = getDistance(
+        adminLat,
+        adminLon,
+        m.location?.lat,
+        m.location?.lon
+      );
 
-  let enriched = mentors.map(m => {
-    const distance = getDistance(
-      adminLat,
-      adminLon,
-      m.location?.lat,
-      m.location?.lon
+      const numericRange = normalizeRange(m.teachingRange);
+      const isInRange = distance <= numericRange;
+
+      // ---------------------------
+      // CLASS & SUBJECT MATCH
+      // ---------------------------
+      let isClassMatch = true;
+      let isSubjectMatch = true;
+
+      const prefs = m.teachingPreferences?.school || {};
+
+      if (classLevel) {
+        isClassMatch = Object.keys(prefs)
+          .map(k => k.toLowerCase())
+          .includes(classLevel.toLowerCase());
+      }
+
+      if (subject && classLevel) {
+        const subjects = prefs[classLevel] || [];
+        isSubjectMatch = subjects
+          .map(s => s.toLowerCase())
+          .includes(subject.toLowerCase());
+      }
+
+      const strongMatch = isClassMatch && isSubjectMatch;
+
+      // ---------------------------
+      // EXPERIENCE & PRICE MATCH
+      // ---------------------------
+      const mentorExp = Number(m.teachingExperience || 0);
+      const mentorPrice = Number(m.fees || Infinity);
+
+      const isExperienceMatch =
+        !reqExperience || mentorExp >= reqExperience;
+
+      const isPriceMatch =
+        !reqPrice || mentorPrice <= reqPrice;
+
+      return {
+        ...m._doc,
+        distance,
+        convertedRange: numericRange,
+        isInRange,
+        isClassMatch,
+        isSubjectMatch,
+        strongMatch,
+        mentorExp,
+        mentorPrice,
+        isExperienceMatch,
+        isPriceMatch,
+      };
+    });
+
+    // -----------------------------
+    // FILTER FIRST (IMPORTANT)
+    // -----------------------------
+    enriched = enriched.filter(m =>
+      m.isExperienceMatch && m.isPriceMatch
     );
 
-    const numericRange = normalizeRange(m.teachingRange);
-    const isInRange = distance <= numericRange;
+    // -----------------------------
+    // FINAL SORTING PRIORITY
+    // -----------------------------
+    enriched.sort((a, b) => {
+      // 1️⃣ Strong class + subject match
+      if (a.strongMatch && !b.strongMatch) return -1;
+      if (!a.strongMatch && b.strongMatch) return 1;
 
-    // ---------------------------
-    // CLASS & SUBJECT FILTER LOGIC
-    // ---------------------------
+      // 2️⃣ In teaching range
+      if (a.isInRange && !b.isInRange) return -1;
+      if (!a.isInRange && b.isInRange) return 1;
 
-    let isClassMatch = true;
-    let isSubjectMatch = true;
+      // 3️⃣ Higher experience first
+      if (a.mentorExp !== b.mentorExp)
+        return b.mentorExp - a.mentorExp;
 
-    const prefs = m.teachingPreferences?.school || {};
+      // 4️⃣ Lower price first
+      if (a.mentorPrice !== b.mentorPrice)
+        return a.mentorPrice - b.mentorPrice;
 
-    // If class filter applied
-    if (classLevel) {
-      const classKey = String(classLevel).toLowerCase();
+      // 5️⃣ Availability
+      if (a.isAvailable && !b.isAvailable) return -1;
+      if (!a.isAvailable && b.isAvailable) return 1;
 
-      isClassMatch = Object.keys(prefs)
-        .map(k => k.toLowerCase())
-        .includes(classKey);
-    }
+      // 6️⃣ Nearest mentor
+      return a.distance - b.distance;
+    });
 
-    // If subject filter applied
-    if (subject && classLevel) {
-      const subjects = prefs[classLevel] || [];
-
-      isSubjectMatch = subjects
-        .map(s => s.toLowerCase())
-        .includes(subject.toLowerCase());
-    }
-
-    const strongMatch =
-      isClassMatch &&
-      isSubjectMatch
-    
-    return {
-      ...m._doc,
-      distance,
-      convertedRange: numericRange,
-      isInRange,
-      isClassMatch,
-      strongMatch,
-      isSubjectMatch,
-    };
-  });
-
-  // FINAL SORTING PRIORITY
-  enriched.sort((a, b) => {
-    // 1️⃣ Strong match first (class + subject + rank)
-    if (a.strongMatch && !b.strongMatch) return -1;
-    if (!a.strongMatch && b.strongMatch) return 1;
-
-    // 2️⃣ In teaching range
-    if (a.isInRange && !b.isInRange) return -1;
-    if (!a.isInRange && b.isInRange) return 1;
-
-    // 3️⃣ Available mentors first
-    if (a.isAvailable && !b.isAvailable) return -1;
-    if (!a.isAvailable && b.isAvailable) return 1;
-
-    // 4️⃣ Nearest first
-    return a.distance - b.distance;
-  });
-
-  res.json(enriched);
+    res.json(enriched);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 module.exports = router;
