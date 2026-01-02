@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const CallIntent = require("../models/CallIntent");
+const MentorLead = require("../models/MentorLead");
 const router = express.Router();
 
 const makeOutgoingCall = async ({
@@ -143,6 +144,13 @@ router.get("/get-mentor-number", async (req, res) => {
     parentPhone: parentNumber,
     createdAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) }
   }).sort({ createdAt: -1 });
+
+  let lead = await MentorLead.findOne({
+    phone: intent.mentorPhone
+  })
+
+  lead.isCalled = true
+  await lead.save()
   
   console.log(intent)
 

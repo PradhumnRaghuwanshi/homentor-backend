@@ -26,6 +26,15 @@ router.put("/:id", async (req, res) => {
   res.json(lead);
 });
 
+router.post("/second-form", async (req, res) => {
+  const lead = await MentorLead.findOne(
+    {phone : req.body.phone}
+  );
+  lead.secondForm = true
+  await lead.save()
+  res.json(lead);
+});
+
 router.get("/sorted-mentor-leads", async (req, res) => {
   const { lat, lon, subject, classLevel } = req.query;
 

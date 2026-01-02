@@ -5,6 +5,7 @@ const ClassBooking = require("../models/ClassBooking");
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const Mentor = require("../models/Mentor");
+const MentorLead = require("../models/MentorLead");
 
 // Get all class bookings
 router.get("/", async (req, res) => {
@@ -78,6 +79,18 @@ router.post("/manual-booking", async (req, res) => {
     });
 
     const savedBooking = await newBooking.save();
+
+    const mentor = await Mentor.find(req.body.mentorId)
+
+     let lead = await MentorLead.findOne({
+          phone : mentor.phone
+      })
+    
+      if(lead){
+        lead.paidBooked = true
+        await lead.save()
+      }
+    
 
     // 5️⃣ Send success response
     res.status(201).json({

@@ -206,7 +206,6 @@ router.get('/gold-mentor', async (req, res) => {
   res.status(200).json({ data: goldMentors })
 })
 
-// GET mentor by ID
 router.get("/:id", async (req, res) => {
   try {
     const mentor = await Mentor.findById(req.params.id).populate("student", "name email");
@@ -218,6 +217,7 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 router.post("/batch", async (req, res) => {
   try {
     const mentorIds = req.body.ids;   // receives ["id1", "id2", "id3"]
@@ -233,7 +233,6 @@ router.post("/batch", async (req, res) => {
   }
 });
 
-// POST new mentor
 router.post("/", async (req, res) => {
   try {
     // ✅ 1. Normalize mobile number (last 10 digits only)
@@ -268,6 +267,10 @@ router.post("/", async (req, res) => {
     if(mentorLead){
       mentorLead.leadFormFilled = true
       await mentorLead.save()
+    } else {
+      const newMentorLead = new MentorLead(req.body)
+      newMentorLead.leadFormFilled = true
+      await newMentorLead.save()
     }
     res.status(201).json({ data: newMentor });
   } catch (error) {

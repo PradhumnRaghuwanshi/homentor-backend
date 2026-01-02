@@ -2,6 +2,7 @@ const express = require("express");
 const DemoBooking = require("../models/DemoBooking");
 const User = require("../models/User");
 const ClassBooking = require("../models/ClassBooking");
+const MentorLead = require("../models/MentorLead");
 
 const router = express.Router();
 
@@ -38,6 +39,15 @@ router.post("/", async (req, res) => {
       isDemo : true,
       demoStatus : "running"
     });
+
+    let lead = await MentorLead.findOne({
+      phone : req.body.mentorPhone
+    })
+
+    if(lead){
+      lead.demoBooked = true
+      await lead.save()
+    }
 
     res.status(201).json({
       success: true,

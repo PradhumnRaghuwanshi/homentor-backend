@@ -23,7 +23,7 @@ const mentorLeadSchema = new mongoose.Schema(
     },
 
     teachingRange: {
-      type: String, 
+      type: String,
     },
 
     bio: {
@@ -45,6 +45,28 @@ const mentorLeadSchema = new mongoose.Schema(
       default: false,
     },
 
+    secondForm: {
+      type: Boolean,
+      default: false,
+    },
+    linkSend: {
+      type: Boolean,
+      default: false,
+    },
+    isCalled: {
+      type: Boolean,
+      default: false,
+    },
+    demoBooked : {
+      type: Boolean,
+      default: false,
+    },
+    paidBooked : {
+      type: Boolean,
+      default: false,
+    },
+
+
     interviewDone: {
       type: Boolean,
       default: false,
@@ -55,14 +77,14 @@ const mentorLeadSchema = new mongoose.Schema(
     },
 
     teachingExperience: {
-      type : String
+      type: String
     },
-    
+
     urgentlyNeeded: {
       type: Boolean,
       default: false,
     },
-    whatsappAdded : {
+    whatsappAdded: {
       type: Boolean,
       default: false,
     }
