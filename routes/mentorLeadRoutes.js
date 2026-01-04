@@ -1,11 +1,17 @@
 const express = require("express");
 const MentorLead = require("../models/MentorLead.js");
+const Mentor = require("../models/Mentor");
 
 const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const lead = await MentorLead.create(req.body);
+    let lead = await MentorLead.create(req.body);
+    const mentor = await Mentor.find({phone : req.body.phone})
+    if(mentor){
+      lead.leadFormFilled = true
+      await lead.save()
+    }
     res.status(201).json(lead);
   } catch (err) {
     res.status(400).json({ message: err.message });
