@@ -147,7 +147,7 @@ router.get("/get-mentor-number", async (req, res) => {
       req.body.from;
 
     const parentNumber = normalizePhone(rawParentNumber);
-  console.log("Parent calling number:", parentNumber);
+    console.log("Parent calling number:", parentNumber);
 
   // Find latest intent (within 5 minutes)
   const intent = await CallIntent.findOne({

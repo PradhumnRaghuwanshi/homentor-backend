@@ -85,8 +85,9 @@ router.get("/sorted-mentor-leads", async (req, res) => {
         m.location?.lat,
         m.location?.lon
       );
-
       const numericRange = normalizeRange(m.teachingRange);
+      console.log(`distance - ${distance}, range - ${numericRange}`)
+
       const isInRange = distance <= numericRange;
 
       // ---------------------------
