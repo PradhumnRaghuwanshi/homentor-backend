@@ -127,15 +127,26 @@ router.post("/call/initiate", async(req, res) => {
   res.json({ success: true });
 });
 
+function normalizePhone(phone) {
+  if (!phone) return null;
+
+  return phone
+    .toString()
+    .replace(/\D/g, "")     // remove non-digits
+    .replace(/^0+/, "")     // remove leading zeros
+    .slice(-10);            // keep last 10 digits
+}
+
 router.get("/get-mentor-number", async (req, res) => {
 
   console.log("Full body:", req.body);
 
-  const parentNumber =
-    req.body.From ||        // Exotel POST
-    req.query.From ||       // Sometimes via query
-    req.body.from;
+  const rawParentNumber =
+      req.body.From ||
+      req.query.From ||
+      req.body.from;
 
+    const parentNumber = normalizePhone(rawParentNumber);
   console.log("Parent calling number:", parentNumber);
 
   // Find latest intent (within 5 minutes)
