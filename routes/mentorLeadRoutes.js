@@ -182,5 +182,18 @@ router.get("/sorted-mentor-leads", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const mentorLead = await MentorLead.findByIdAndDelete(req.params.id);
+    if (!mentorLead) {
+      return res.status(404).json({ message: "Mentor not found" });
+    }
+    res.status(200).json({ message: "Mentor deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
+  }
+});
+
 
 module.exports = router;
