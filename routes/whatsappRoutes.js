@@ -1,5 +1,5 @@
-const express = reuire("express");
-const axios = reuire("axios");
+const express = require("express");
+const axios = require("axios");
 
 const router = express.Router();
 
