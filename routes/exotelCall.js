@@ -81,11 +81,11 @@ router.post("/call", async (req, res) => {
     }
 
     await CallIntent.create({
-    parentPhone,
-    mentorId,
-    mentorPhone: mentorPhone,
-    createdAt: new Date()
-  });
+      parentPhone,
+      mentorId,
+      mentorPhone: mentorPhone,
+      createdAt: new Date()
+    });
 
     const result = await makeOutgoingCall({
       fromNumber: mentorNumber,
@@ -146,14 +146,16 @@ router.get("/get-mentor-number", async (req, res) => {
     parentPhone: rawParentNumber
   }).sort({ createdAt: -1 });
   console.log("intent ", intent)
-  
+
   let lead = await MentorLead.findOne({
     phone: intent.mentorPhone
   })
+  if (lead) {
+    lead.isCalled = true
+    lead.status = "call_done"
+    await lead.save()
+  }
 
-  // lead.isCalled = true
-  lead.status = "call_done"
-  await lead.save()
 
   console.log(intent)
 
