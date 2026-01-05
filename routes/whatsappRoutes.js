@@ -8,7 +8,7 @@ router.post("/send", async (req, res) => {
   try {
     // const { phone, message } = req.body;
 
-    const url = `https://graph.facebook.com/v24.0/939631422565669/messages`;
+    const url = `https://graph.facebook.com/v24.0/959012667286092/messages`;
 
     const payload = {
       messaging_product: "whatsapp",
