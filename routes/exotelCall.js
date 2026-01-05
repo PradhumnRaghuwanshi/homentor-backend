@@ -65,10 +65,6 @@ const makeOutgoingCall = async ({
   return response.data;
 };
 
-/* ===========================
-   ROUTE: INITIATE CALL
-=========================== */
-
 router.post("/call", async (req, res) => {
   try {
     const {
@@ -83,6 +79,13 @@ router.post("/call", async (req, res) => {
         message: "mentorNumber, parentNumber and virtualNumber are required"
       });
     }
+
+    await CallIntent.create({
+    parentPhone,
+    mentorId,
+    mentorPhone: mentorPhone,
+    createdAt: new Date()
+  });
 
     const result = await makeOutgoingCall({
       fromNumber: mentorNumber,
@@ -106,17 +109,10 @@ router.post("/call", async (req, res) => {
   }
 });
 
-/* ===========================
-   ROUTE: STATUS CALLBACK
-=========================== */
 
 router.post("/call/initiate", async (req, res) => {
   const { parentPhone, mentorId, mentorPhone } = req.body;
 
-  // Example mentor lookup
-  // const mentor = await Mentor.findById(mentorId);
-
-  // Store mapping (DB or Redis)
   await CallIntent.create({
     parentPhone,
     mentorId,
@@ -129,7 +125,6 @@ router.post("/call/initiate", async (req, res) => {
 
 function normalizePhone(phone) {
   if (!phone) return null;
-
   return phone
     .toString()
     .replace(/\D/g, "")     // remove non-digits

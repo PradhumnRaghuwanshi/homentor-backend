@@ -25,7 +25,7 @@ const CallIntentSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      expires: 300, // ⛔ auto-delete after 5 minutes
+      // expires: 300, // ⛔ auto-delete after 5 minutes
     },
 
     // 📊 Call status tracking (optional but powerful)
