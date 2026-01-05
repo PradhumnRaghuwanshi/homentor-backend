@@ -42,13 +42,13 @@ const makeOutgoingCall = async ({
     custom_field: customField || "exotel_call",
     status_callback: statusCallbackUrl
       ? [
-          {
-            event: "terminal",
-            url: statusCallbackUrl,
-            method: "POST",
-            content_type: "application/json"
-          }
-        ]
+        {
+          event: "terminal",
+          url: statusCallbackUrl,
+          method: "POST",
+          content_type: "application/json"
+        }
+      ]
       : []
   };
 
@@ -87,7 +87,7 @@ router.post("/call", async (req, res) => {
     const result = await makeOutgoingCall({
       fromNumber: mentorNumber,
       toNumber: parentNumber,
-      virtualNumber : "+917314852387",
+      virtualNumber: "+917314852387",
       customField: bookingId,
       statusCallbackUrl: "https://yourdomain.com/api/exotel/callback"
     });
@@ -110,7 +110,7 @@ router.post("/call", async (req, res) => {
    ROUTE: STATUS CALLBACK
 =========================== */
 
-router.post("/call/initiate", async(req, res) => {
+router.post("/call/initiate", async (req, res) => {
   const { parentPhone, mentorId, mentorPhone } = req.body;
 
   // Example mentor lookup
@@ -138,20 +138,16 @@ function normalizePhone(phone) {
 }
 
 router.get("/get-mentor-number", async (req, res) => {
-
-  console.log("Full body:", req.body);
-
   const rawParentNumber =
-      req.body.From ||
-      req.query.From ||
-      req.body.from;
+    req.body.From ||
+    req.query.From ||
+    req.body.from;
 
-    const parentNumber = normalizePhone(rawParentNumber);
-    console.log("Parent calling number:", parentNumber);
+  const parentNumber = normalizePhone(rawParentNumber);
+  console.log("Parent calling number:", parentNumber);
 
   // Find latest intent (within 5 minutes)
   const intent = await CallIntent.findOne({
-    
     parentPhone: parentNumber,
     createdAt: { $gte: new Date(Date.now() - 5 * 60 * 1000) }
   }).sort({ createdAt: -1 });
@@ -163,7 +159,7 @@ router.get("/get-mentor-number", async (req, res) => {
   lead.isCalled = true
   lead.status = "call_done"
   await lead.save()
-  
+
   console.log(intent)
 
   res.set("Content-Type", "text/xml");
