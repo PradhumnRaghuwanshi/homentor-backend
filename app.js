@@ -26,6 +26,7 @@ app.use('/api/disclaimer', require("./routes/disclaimerRoutes.js"))
 app.use('/api/mentor-leads', require("./routes/mentorLeadRoutes.js"))
 app.use('/api/parent-leads', require("./routes/parentLeadRoutes.js"))
 app.use("/api/exotel", require("./routes/exotelCall.js"));
+app.use("/api/call-intent", require("./routes/callIntent.js"));
 
 
 
