@@ -146,11 +146,12 @@ router.get("/get-mentor-number", async (req, res) => {
     parentPhone: rawParentNumber
   }).sort({ createdAt: -1 });
   console.log("intent ", intent)
+  
   let lead = await MentorLead.findOne({
     phone: intent.mentorPhone
   })
 
-  lead.isCalled = true
+  // lead.isCalled = true
   lead.status = "call_done"
   await lead.save()
 
