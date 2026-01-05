@@ -119,7 +119,7 @@ router.patch("/status/:id", async (req, res) => {
  */
 router.get("/all", async (req, res) => {
   try {
-    const intents = await CallIntent.find()
+    const intents = await CallIntent.find().populate("mentorId", "fullName" )
       .sort({ createdAt: -1 })
       .limit(100);
 
