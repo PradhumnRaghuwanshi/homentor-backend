@@ -65,50 +65,6 @@ const makeOutgoingCall = async ({
   return response.data;
 };
 
-router.post("/call", async (req, res) => {
-  try {
-    const {
-      mentorNumber,
-      parentNumber,
-      bookingId
-    } = req.body;
-
-    if (!mentorNumber || !parentNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "mentorNumber, parentNumber and virtualNumber are required"
-      });
-    }
-
-    await CallIntent.create({
-      parentPhone,
-      mentorId,
-      mentorPhone: mentorPhone,
-      createdAt: new Date()
-    });
-
-    const result = await makeOutgoingCall({
-      fromNumber: mentorNumber,
-      toNumber: parentNumber,
-      virtualNumber: "+917314852387",
-      customField: bookingId,
-      statusCallbackUrl: "https://yourdomain.com/api/exotel/callback"
-    });
-
-    res.json({
-      success: true,
-      message: "Call initiated",
-      data: result
-    });
-  } catch (error) {
-    console.error("Exotel call error:", error);
-    res.status(500).json({
-      success: false,
-      error
-    });
-  }
-});
-
 
 router.post("/call/initiate", async (req, res) => {
   const { parentPhone, mentorId, mentorPhone } = req.body;
@@ -117,7 +73,8 @@ router.post("/call/initiate", async (req, res) => {
     parentPhone,
     mentorId,
     mentorPhone: mentorPhone,
-    createdAt: new Date()
+    createdAt: new Date(),
+    statusCallbackUrl: "https://homentor-backend.onrender.com/api/exotel/call-status"
   });
 
   res.json({ success: true });
@@ -166,6 +123,60 @@ router.get("/get-mentor-number", async (req, res) => {
     </Response>
   `);
 });
+
+router.post("/call-status", async (req, res) => {
+  try {
+    const data = req.body;
+    console.log("📞 Exotel Call Status:", data);
+
+    const callSid = data.CallSid || data.call_sid;
+    const status = data.CallStatus || data.Status;
+    const duration = data.Duration ? Number(data.Duration) : 0;
+    const recordingUrl = data.RecordingUrl;
+    const disconnectReason = data.DisconnectReason;
+    const parentPhone = normalizePhone(data.From);
+    const mentorPhone = normalizePhone(data.To);
+
+    // 🔍 Find existing log or create new
+    let callLog = await CallLog.findOne({ callSid });
+
+    if (!callLog) {
+      callLog = new CallLog({
+        callSid,
+        parentPhone,
+        mentorPhone,
+      });
+    }
+
+    callLog.status = status;
+    callLog.duration = duration || callLog.duration;
+    callLog.recordingUrl = recordingUrl || callLog.recordingUrl;
+    callLog.disconnectReason = disconnectReason;
+    callLog.rawExotelData = data;
+
+    await callLog.save();
+
+    // 🔁 OPTIONAL: update CallIntent (if still exists)
+    if (parentPhone) {
+      const intent = await CallIntent.findOne({
+        parentPhone,
+      }).sort({ createdAt: -1 });
+
+      if (intent) {
+        intent.status =
+          status === "completed" ? "connected" : "failed";
+        await intent.save();
+      }
+    }
+
+    // 🚨 ALWAYS 200 for Exotel
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("❌ CallLog Error:", err);
+    res.sendStatus(200);
+  }
+});
+
 
 
 module.exports = router;
