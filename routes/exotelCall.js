@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const CallIntent = require("../models/CallIntent");
 const MentorLead = require("../models/MentorLead");
+const CallLog = require("../models/CallLog");
 const router = express.Router();
 
 const makeOutgoingCall = async ({
