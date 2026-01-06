@@ -5,66 +5,49 @@ const MentorLead = require("../models/MentorLead");
 const CallLog = require("../models/CallLog");
 const router = express.Router();
 
-const makeOutgoingCall = async ({
-  fromNumber,
-  toNumber,
-  virtualNumber,
-  customField,
-  statusCallbackUrl
-}) => {
-  const {
-    EXOTEL_API_KEY,
-    EXOTEL_API_TOKEN,
-    EXOTEL_ACCOUNT_SID
-  } = process.env;
+router.get("/exotel-calls", async (req, res) => {
+  try {
+    const {
+      EXOTEL_API_KEY,
+      EXOTEL_API_TOKEN,
+      EXOTEL_ACCOUNT_SID
+    } = process.env;
 
-  if (!EXOTEL_API_KEY || !EXOTEL_API_TOKEN || !EXOTEL_ACCOUNT_SID) {
-    throw new Error("Exotel environment variables missing");
-  }
-
-  const BASE_URL = "https://ccm-api.exotel.com"; // Singapore cluster
-  const url = `${BASE_URL}/v3/accounts/${EXOTEL_ACCOUNT_SID}/calls`;
-
-  const payload = {
-    from: {
-      contact_uri: fromNumber,
-      state_management: true
-    },
-    to: {
-      contact_uri: toNumber
-    },
-    virtual_number: virtualNumber,
-    recording: {
-      record: true,
-      channels: "single"
-    },
-    max_time_limit: 4000,
-    attempt_time_out: 45,
-    custom_field: customField || "exotel_call",
-    status_callback: statusCallbackUrl
-      ? [
-        {
-          event: "terminal",
-          url: statusCallbackUrl,
-          method: "POST",
-          content_type: "application/json"
-        }
-      ]
-      : []
-  };
-
-  const response = await axios.post(url, payload, {
-    auth: {
-      username: EXOTEL_API_KEY,
-      password: EXOTEL_API_TOKEN
-    },
-    headers: {
-      "Content-Type": "application/json"
+    if (!EXOTEL_API_KEY || !EXOTEL_API_TOKEN || !EXOTEL_ACCOUNT_SID) {
+      return res.status(500).json({
+        success: false,
+        message: "Exotel environment variables missing"
+      });
     }
-  });
 
-  return response.data;
-};
+    // 🇮🇳 Mumbai cluster (use this for India accounts)
+    const BASE_URL = "https://ccm-api.in.exotel.com";
+    const url = `${BASE_URL}/v3/accounts/${EXOTEL_ACCOUNT_SID}/calls`;
+
+    const response = await axios.get(url, {
+      auth: {
+        username: EXOTEL_API_KEY,
+        password: EXOTEL_API_TOKEN
+      },
+      params: {
+        per_page: 20,     // last 20 calls
+        sort: "desc"
+      }
+    });
+
+    res.json({
+      success: true,
+      calls: response.data?.calls || []
+    });
+
+  } catch (error) {
+    console.error("❌ Exotel fetch error:", error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      error: error.response?.data || error.message
+    });
+  }
+});
 
 
 router.post("/call/initiate", async (req, res) => {
@@ -77,7 +60,6 @@ router.post("/call/initiate", async (req, res) => {
     createdAt: new Date(),
     statusCallbackUrl: "https://homentor-backend.onrender.com/api/exotel/call-status"
   });
-
   res.json({ success: true });
 });
 
@@ -113,7 +95,6 @@ router.get("/get-mentor-number", async (req, res) => {
     lead.status = "call_done"
     await lead.save()
   }
-
 
   console.log(intent)
 
