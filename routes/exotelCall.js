@@ -29,10 +29,6 @@ router.get("/exotel-calls", async (req, res) => {
       auth: {
         username: EXOTEL_API_KEY,
         password: EXOTEL_API_TOKEN
-      },
-      params: {
-        per_page: 20,     // last 20 calls
-        sort: "desc"
       }
     });
 
