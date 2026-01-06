@@ -4,6 +4,8 @@ const CallIntent = require("../models/CallIntent");
 const MentorLead = require("../models/MentorLead");
 const CallLog = require("../models/CallLog");
 const router = express.Router();
+const xml2js = require("xml2js");
+
 
 router.get("/exotel-calls", async (req, res) => {
   try {
@@ -32,9 +34,21 @@ router.get("/exotel-calls", async (req, res) => {
       }
     });
 
+    // 🔄 Convert XML → JSON
+    const parser = new xml2js.Parser({ explicitArray: false });
+    const result = await parser.parseStringPromise(response.data);
+
+    const calls =
+      result?.TwilioResponse?.Call
+        ? Array.isArray(result.TwilioResponse.Call)
+          ? result.TwilioResponse.Call
+          : [result.TwilioResponse.Call]
+        : [];
+
     res.json({
       success: true,
-      calls: response.data || ["ok"]
+      count: calls.length,
+      calls,
     });
 
   } catch (error) {
