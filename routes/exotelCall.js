@@ -38,7 +38,7 @@ router.get("/exotel-calls", async (req, res) => {
 
     res.json({
       success: true,
-      calls: response.data?.calls || []
+      calls: response.data?.calls || ["ok"]
     });
 
   } catch (error) {
