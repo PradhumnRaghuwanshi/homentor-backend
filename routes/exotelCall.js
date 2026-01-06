@@ -23,7 +23,7 @@ router.get("/exotel-calls", async (req, res) => {
     // 🇮🇳 Mumbai cluster (use this for India accounts)
     const BASE_URL = "https://ccm-api.exotel.com";
     const BASE_URL2 = "https://api.exotel.com";
-    const url = `${BASE_URL2}/v1/Accounts/${EXOTEL_ACCOUNT_SID}/calls`;
+    const url = `${BASE_URL2}/v1/Accounts/${EXOTEL_ACCOUNT_SID}/Calls`;
 
     const response = await axios.get(url, {
       auth: {
