@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const CallLogSchema = new mongoose.Schema(
   {
     callSid: { type: String, unique: true },
-
+    mentorName: String,
     parentPhone: String,
     mentorPhone: String,
     exophone: String,

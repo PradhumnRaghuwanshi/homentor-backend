@@ -1,7 +1,16 @@
 const axios = require("axios");
 const xml2js = require("xml2js");
 const CallLog = require("../models/CallLog");
+const Mentor = require("../models/Mentor");
 
+function normalizePhone(phone) {
+  if (!phone) return null;
+  return phone
+    .toString()
+    .replace(/\D/g, "")     // remove non-digits
+    .replace(/^0+/, "")     // remove leading zeros
+    .slice(-10);            // keep last 10 digits
+}
 async function syncExotelCalls() {
   const {
     EXOTEL_API_KEY,
@@ -34,6 +43,9 @@ async function syncExotelCalls() {
       : [];
 
   for (const call of calls) {
+    const mentorPhone = normalizePhone(call.To)
+    const mentor = await Mentor.findOne({ phone: mentorPhone });
+
     await CallLog.updateOne(
       { callSid: call.Sid },
       {
@@ -42,7 +54,7 @@ async function syncExotelCalls() {
           parentPhone: call.From,
           mentorPhone: call.To,
           exophone: call.PhoneNumber,
-
+         mentorName: mentor?.name || "Unknown Mentor",
           status: call.Status,
           duration: Number(call.Duration || 0),
           price: Number(call.Price || 0),
