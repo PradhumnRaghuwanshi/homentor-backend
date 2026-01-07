@@ -5,6 +5,7 @@ const MentorLead = require("../models/MentorLead");
 const CallLog = require("../models/CallLog");
 const router = express.Router();
 const xml2js = require("xml2js");
+const syncExotelCalls = require("../utils/syncExotelCalls");
 
 
 router.get("/exotel-calls", async (req, res) => {
@@ -25,12 +26,16 @@ router.get("/exotel-calls", async (req, res) => {
     // 🇮🇳 Mumbai cluster (use this for India accounts)
     const BASE_URL = "https://ccm-api.exotel.com";
     const BASE_URL2 = "https://api.exotel.com";
-    const url = `${BASE_URL2}/v1/Accounts/${EXOTEL_ACCOUNT_SID}/Calls?PageSize=10`;
+    const url = `${BASE_URL2}/v1/Accounts/${EXOTEL_ACCOUNT_SID}/Calls`;
 
     const response = await axios.get(url, {
       auth: {
         username: EXOTEL_API_KEY,
         password: EXOTEL_API_TOKEN
+      },
+      params: {
+        PageSize: pageSize,
+        SortBy: "DateCreated:desc"
       }
     });
 
@@ -60,6 +65,22 @@ router.get("/exotel-calls", async (req, res) => {
   }
 });
 
+router.post("/sync-call-logs", async (req, res) => {
+  try {
+    const count = await syncExotelCalls();
+    res.json({
+      success: true,
+      message: "Call logs synced",
+      count
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
 
 router.post("/call/initiate", async (req, res) => {
   const { parentPhone, mentorId, mentorPhone } = req.body;

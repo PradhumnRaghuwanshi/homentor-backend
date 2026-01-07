@@ -2,43 +2,26 @@ const mongoose = require("mongoose");
 
 const CallLogSchema = new mongoose.Schema(
   {
-    callSid: {
-      type: String,
-      index: true,
-    },
+    callSid: { type: String, unique: true },
 
-    parentPhone: {
-      type: String,
-      index: true,
-    },
+    parentPhone: String,
+    mentorPhone: String,
+    exophone: String,
 
-    mentorPhone: {
-      type: String,
-      index: true,
-    },
+    status: String,        // completed, failed, busy
+    duration: Number,      // seconds
+    price: Number,
 
-    mentorId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Mentor",
-    },
-
-    status: {
-      type: String,
-      enum: ["initiated", "answered", "completed", "failed", "busy", "no-answer"],
-    },
-
-    duration: Number, // seconds
+    startTime: Date,
+    endTime: Date,
 
     recordingUrl: String,
+    direction: String,     // inbound / outbound
+    answeredBy: String,    // human / machine
 
-    disconnectReason: String,
-
-    rawExotelData: Object, // full payload for safety/debug
-
+    rawExotelData: Object  // 🔒 full backup (important)
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("CallLog", CallLogSchema);
