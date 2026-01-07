@@ -182,6 +182,13 @@ router.get('/pending-mentors', async (req, res) => {
   res.status(200).json({ data: pendingMentors })
 })
 
+router.get('/rejected-mentors', async (req, res) => {
+  const rejectedMentors = await Mentor.find({
+    status: "Rejected"
+  })
+  res.status(200).json({ data: rejectedMentors })
+})
+
 router.get('/approved-mentors', async (req, res) => {
   const pendingMentors = await Mentor.find({
     status: "Approved"
