@@ -54,7 +54,7 @@ async function syncExotelCalls() {
           parentPhone: call.From,
           mentorPhone: call.To,
           exophone: call.PhoneNumber,
-         mentorName: mentor?.name || "Unknown Mentor",
+         mentorName: mentor?.fullName || "Unknown Mentor",
           status: call.Status,
           duration: Number(call.Duration || 0),
           price: Number(call.Price || 0),
