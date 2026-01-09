@@ -228,7 +228,7 @@ router.get("/:id", async (req, res) => {
 router.post("/batch", async (req, res) => {
   try {
     const mentorIds = req.body.ids;   // receives ["id1", "id2", "id3"]
-    
+
     const mentors = await Mentor.find({
       _id: { $in: mentorIds }
     }).select("fullName phone profilePhoto teachingModes phone");
@@ -269,9 +269,9 @@ router.post("/", async (req, res) => {
     const newMentor = await mentor.save();
 
     const mentorLead = await MentorLead.find({
-      phone : req.body.phone
-    }) 
-    if(mentorLead){
+      phone: req.body.phone
+    })
+    if (mentorLead) {
       mentorLead.leadFormFilled = true
       mentorLead.status = "first_form"
       await mentorLead.save()
@@ -303,6 +303,283 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+function buildRecommendationPipeline({
+  parentLat,
+  parentLon,
+  variant,
+}) {
+  const bookingBonus = variant === "A" ? 30 : 50;
+  const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  return [
+    // 1️⃣ Basic filtering (cheap operations first)
+    {
+      $match: {
+        "location.city": "Indore",
+        showOnWebsite: true,
+        runningBookingsCount: { $lt: 3 },
+      },
+    },
+
+    // 2️⃣ Calculate distance (Haversine formula, in KM)
+    {
+      $addFields: {
+        distanceKm: {
+          $multiply: [
+            6371, // Earth radius in KM
+            {
+              $acos: {
+                $add: [
+                  {
+                    $multiply: [
+                      {
+                        $cos: { $degreesToRadians: parentLat },
+                      },
+                      {
+                        $cos: {
+                          $degreesToRadians: "$location.lat",
+                        },
+                      },
+                      {
+                        $cos: {
+                          $subtract: [
+                            { $degreesToRadians: "$location.lon" },
+                            { $degreesToRadians: parentLon },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    $multiply: [
+                      {
+                        $sin: { $degreesToRadians: parentLat },
+                      },
+                      {
+                        $sin: {
+                          $degreesToRadians: "$location.lat",
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    },
+
+    // 3️⃣ Teaching-range aware distance score
+    {
+      $addFields: {
+        distanceScore: {
+          $switch: {
+            branches: [
+              {
+                // Parent inside mentor range
+                case: { $lte: ["$distanceKm", "$teachingRange"] },
+                then: 150,
+              },
+              {
+                // Slightly outside range
+                case: {
+                  $lte: [
+                    "$distanceKm",
+                    { $add: ["$teachingRange", 3] },
+                  ],
+                },
+                then: 80,
+              },
+              {
+                // Far but acceptable
+                case: {
+                  $lte: [
+                    "$distanceKm",
+                    { $add: ["$teachingRange", 7] },
+                  ],
+                },
+                then: 40,
+              },
+            ],
+            default: 0,
+          },
+        },
+      },
+    },
+
+    // 4️⃣ Subject + booking + rotation scoring
+    {
+      $addFields: {
+        priorityScore: {
+          $add: [
+            "$distanceScore",
+
+            // 🔥 class 9–10 Mathematics
+            {
+              $cond: [
+                {
+                  $in: [
+                    "Mathematics",
+                    {
+                      $ifNull: [
+                        "$teachingPreferences.school.class-9-10",
+                        [],
+                      ],
+                    },
+                  ],
+                },
+                100,
+                0,
+              ],
+            },
+
+            // 🟠 class 6–8 Mathematics
+            {
+              $cond: [
+                {
+                  $in: [
+                    "Mathematics",
+                    {
+                      $ifNull: [
+                        "$teachingPreferences.school.class-6-8",
+                        [],
+                      ],
+                    },
+                  ],
+                },
+                70,
+                0,
+              ],
+            },
+
+            // 🟡 class 1–5 English
+            {
+              $cond: [
+                {
+                  $in: [
+                    "English",
+                    {
+                      $ifNull: [
+                        "$teachingPreferences.school.class-1-5",
+                        [],
+                      ],
+                    },
+                  ],
+                },
+                40,
+                0,
+              ],
+            },
+
+            // Booking engagement bonus
+            {
+              $cond: [
+                { $gt: ["$runningBookingsCount", 0] },
+                bookingBonus,
+                0,
+              ],
+            },
+
+            // Rotation penalty
+            {
+              $cond: [
+                { $gt: ["$lastShownAt", last24Hours] },
+                -20,
+                0,
+              ],
+            },
+          ],
+        },
+      },
+    },
+
+    // 5️⃣ Category buckets
+    {
+      $facet: {
+        gold: [
+          { $match: { category: "gold" } },
+          { $sort: { priorityScore: -1 } },
+          { $limit: 2 },
+        ],
+        silver: [
+          { $match: { category: "silver" } },
+          { $sort: { priorityScore: -1 } },
+          { $limit: 2 },
+        ],
+        budget: [
+          { $match: { category: "budget" } },
+          { $sort: { priorityScore: -1 } },
+          { $limit: 4 },
+        ],
+      },
+    },
+
+    // 6️⃣ Final merge
+    {
+      $project: {
+        mentors: {
+          $concatArrays: ["$gold", "$silver", "$budget"],
+        },
+      },
+    },
+  ];
+}
+
+router.get("/recommended-mentors", async (req, res) => {
+  try {
+    const {
+      lat,
+      lon,
+      city,
+      parentId,
+    } = req.query;
+
+    // 1️⃣ Validate input
+    if (!lat || !lon || !city || !parentId) {
+      return res.status(400).json({
+        success: false,
+        message: "lat, lon, city and parentId are required",
+      });
+    }
+
+    // 2️⃣ A/B testing variant
+    const variant = Number(parentId) % 2 === 0 ? "A" : "B";
+
+    // 3️⃣ Build aggregation pipeline
+    const pipeline = buildRecommendationPipeline({
+      parentLat: Number(lat),
+      parentLon: Number(lon),
+      parentCity: city,
+      variant,
+    });
+
+    // 4️⃣ Execute aggregation
+    const result = await Mentor.aggregate(pipeline);
+    const mentors = result[0]?.mentors || [];
+
+    // 5️⃣ Update rotation info
+    await Mentor.updateMany(
+      { _id: { $in: mentors.map((m) => m._id) } },
+      { $set: { lastShownAt: new Date() } }
+    );
+
+    // 6️⃣ Send response
+    res.json({
+      success: true,
+      count: mentors.length,
+      mentors,
+    });
+  } catch (error) {
+    console.error("Mentor recommendation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 
 
 module.exports = router;

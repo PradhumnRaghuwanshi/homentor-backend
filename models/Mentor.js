@@ -3,15 +3,15 @@ const mongoose = require("mongoose");
 const MentorSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String },
-  phone: { type: String, required: true},
-  gender: {type: String},
-  age: { type: Number},
-  profilePhoto: { type: String},
+  phone: { type: String, required: true },
+  gender: { type: String },
+  age: { type: Number },
+  profilePhoto: { type: String },
   teachingVideo: String,
   cv: String,
   aadharPhoto: String,
   panPhoto: String,
-  marksheet : String,
+  marksheet: String,
   qualifications: {
     highestQualification: String,
     specialization: String,
@@ -24,7 +24,7 @@ const MentorSchema = new mongoose.Schema({
   graduation: {
     degree: String,
     college: String,
-    specialization:String,
+    specialization: String,
     graduationYear: Number
   },
   otherGraduationDegree: String,
@@ -33,13 +33,13 @@ const MentorSchema = new mongoose.Schema({
     college: String,
   },
   alternatePhone: Number,
-        referenceContact: Number,
-        permanentAddress: String,
-        temporaryAddress: String,
-        panNumber: String,
-        bankAccount:Number,
-        ifsc: String,
-        accountHolderName: String,
+  referenceContact: Number,
+  permanentAddress: String,
+  temporaryAddress: String,
+  panNumber: String,
+  bankAccount: Number,
+  ifsc: String,
+  accountHolderName: String,
   location: {
     area: String,
     city: String,
@@ -47,7 +47,7 @@ const MentorSchema = new mongoose.Schema({
     lat: Number,
     lon: Number,
   },
-  experience: { type: String},
+  experience: { type: String },
   experienceDisplay: {
     type: Boolean,
     default: false,
@@ -115,10 +115,10 @@ const MentorSchema = new mongoose.Schema({
     coordinates: { type: [Number], index: "2dsphere", default: [0, 0] },
   },
   category: {
-  type: String,
-  enum: ["gold", "silver", "budget"],
-  default: "silver"
-}
+    type: String,
+    enum: ["gold", "silver", "budget"],
+    default: "silver"
+  }
 });
 
 MentorSchema.index({ coordinates: "2dsphere" });
