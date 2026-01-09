@@ -535,7 +535,7 @@ router.get("/recommended-mentors", async (req, res) => {
       city,
       parentId,
     } = req.query;
-
+    console.log("Hii")
     // 1️⃣ Validate input
     if (!lat || !lon || !city || !parentId) {
       return res.status(400).json({
