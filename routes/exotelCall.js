@@ -2,6 +2,8 @@ const express = require("express");
 const axios = require("axios");
 const CallIntent = require("../models/CallIntent");
 const MentorLead = require("../models/MentorLead");
+const ParentLead = require("../models/ParentLead");
+
 const CallLog = require("../models/CallLog");
 const router = express.Router();
 const xml2js = require("xml2js");
@@ -122,6 +124,14 @@ router.get("/get-mentor-number", async (req, res) => {
   let lead = await MentorLead.findOne({
     phone: intent.mentorPhone
   })
+  let parentLead = await ParentLead.findOne({
+    phone: parentNumber
+  })
+  if (parentLead){
+    parentLead.isCalled = true
+    parentLead.status = "call_done"
+    await parentLead.save()
+  }
   if (lead) {
     lead.isCalled = true
     lead.status = "call_done"

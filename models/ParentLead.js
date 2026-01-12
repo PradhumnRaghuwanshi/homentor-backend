@@ -61,6 +61,15 @@ const parentLeadSchema = new mongoose.Schema(
     teacherLink : {
       type: Boolean,
       default: false,
+    },
+    isCalled : {
+      type: Boolean,
+      default: false
+    },
+    status: {
+      type: String,
+      enum: ["lead_generated" ,"first_form", "interview", "second_form", "link_send", "call_done", "demo_booked", "paid_booking"],
+      default: "lead_generated",
     }
   },
   { timestamps: true }
