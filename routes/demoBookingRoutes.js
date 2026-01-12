@@ -3,6 +3,7 @@ const DemoBooking = require("../models/DemoBooking");
 const User = require("../models/User");
 const ClassBooking = require("../models/ClassBooking");
 const MentorLead = require("../models/MentorLead");
+const ParentLead = require("../models/ParentLead");
 
 const router = express.Router();
 
@@ -36,18 +37,26 @@ router.post("/", async (req, res) => {
       price: 0,
       parent: parent._id,
       duration: 2,
-      isDemo : true,
-      demoStatus : "running"
+      isDemo: true,
+      demoStatus: "running"
     });
 
     let lead = await MentorLead.findOne({
-      phone : req.body.mentorPhone
+      phone: req.body.mentorPhone
     })
 
-    if(lead){
+    if (lead) {
       lead.demoBooked = true
       lead.status = "demo_booked"
       await lead.save()
+    }
+    let parentLead = await ParentLead.findOne({
+      phone: parentPhone
+    })
+    if (parentLead) {
+      parentLead.isCalled = true
+      parentLead.status = "call_done"
+      await parentLead.save()
     }
 
     res.status(201).json({
