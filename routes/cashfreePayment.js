@@ -4,6 +4,8 @@ const Order = require("../models/Order");
 const { Cashfree, CFEnvironment } = require("cashfree-pg");
 const User = require("../models/User");
 const ClassBooking = require("../models/ClassBooking");
+const MentorLead = require("../models/MentorLead");
+const ParentLead = require("../models/ParentLead");
 const cashfree = new Cashfree(CFEnvironment.PRODUCTION, process.env.CASHFREE_CLIENT_ID, process.env.CASHFREE_CLIENT_SECRET);
 const router = express.Router();
 
@@ -79,6 +81,23 @@ router.get('/verify-order/:id', async (req, res) => {
             ).length > 0
         ) {
             oldOrder.status = "success"
+            let lead = await MentorLead.findOne({
+                phone: oldOrder.mentor.phone
+            })
+
+            if (lead) {
+                lead.paidBooked = true
+                lead.status = "paid_booking"
+                await lead.save()
+            }
+            let parentLead = await ParentLead.findOne({
+                phone: oldOrder.parent.phone
+            })
+            if (parentLead) {
+                parentLead.paidBooked = true
+                parentLead.status = "paid_booking"
+                await parentLead.save()
+            }
 
             if (oldOrder.isDemo) {
                 let oldBooking = await ClassBooking.findOne({
@@ -92,7 +111,7 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTuition?.margin,
+                    commissionPrice: oldOrder?.mentor?.teachingModes?.homeTuition?.margin,
                     currentPerClassPrice: oldOrder?.mentor?.teachingModes?.homeTuition?.monthlyPrice / oldOrder?.duration,
                     remainingClasses: oldOrder.duration ? oldOrder.duration : 22
                 })
@@ -106,10 +125,10 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledDate = oldBooking.scheduledDate
                 newBooking.subject = oldBooking.subject
                 newBooking.demoStatus = "session_continued"
-                
+
                 newBooking.save()
-            } 
-            else if (oldOrder.classBookig){
+            }
+            else if (oldOrder.classBookig) {
                 let oldClassBooking = await ClassBooking.findById(oldOrder.classBookig)
                 oldClassBooking.sessionContinued = true
 
@@ -119,7 +138,7 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTuition?.margin,
+                    commissionPrice: oldOrder?.mentor?.teachingModes?.homeTuition?.margin,
                     currentPerClassPrice: oldOrder?.mentor?.teachingModes?.homeTuition?.monthlyPrice / oldOrder?.duration,
                     remainingClasses: oldOrder.duration ? oldOrder.duration : 22
                 })
@@ -132,10 +151,10 @@ router.get('/verify-order/:id', async (req, res) => {
                 newBooking.scheduledDate = oldClassBooking.scheduledDate
                 newBooking.subject = oldClassBooking.subject
                 newBooking.demoStatus = "session_continued",
-                await oldClassBooking.save()
+                    await oldClassBooking.save()
                 await newBooking.save()
 
-            }  else {
+            } else {
 
                 const newBooking = new ClassBooking({
                     mentor: oldOrder.mentor._id,
@@ -143,7 +162,7 @@ router.get('/verify-order/:id', async (req, res) => {
                     parent: oldOrder.parent._id,
                     duration: oldOrder.duration ? oldOrder.duration : 22,
                     session: oldOrder?.session,
-                    commissionPrice : oldOrder?.mentor?.teachingModes?.homeTuition?.margin,
+                    commissionPrice: oldOrder?.mentor?.teachingModes?.homeTuition?.margin,
                     currentPerClassPrice: oldOrder?.mentor?.teachingModes?.homeTuition?.monthlyPrice / oldOrder?.duration,
                     remainingClasses: oldOrder.duration ? oldOrder.duration : 22
                 })
