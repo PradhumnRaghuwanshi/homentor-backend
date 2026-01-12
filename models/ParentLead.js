@@ -66,6 +66,14 @@ const parentLeadSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    demoBooked : {
+      type: Boolean,
+      default: false,
+    },
+    paidBooked : {
+      type: Boolean,
+      default: false,
+    },
     status: {
       type: String,
       enum: ["lead_generated" ,"first_form", "interview", "second_form", "link_send", "call_done", "demo_booked", "paid_booking"],
