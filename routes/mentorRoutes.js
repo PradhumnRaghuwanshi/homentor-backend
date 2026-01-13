@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Mentor = require("../models/Mentor");
 const MentorLead = require("../models/MentorLead");
+const MarginRule = require("../models/MarginRule");
 
 router.get("/nearby-mentors", async (req, res) => {
   const { lat, lon, subject, classLevel, rank } = req.query;
@@ -289,12 +290,45 @@ router.post("/", async (req, res) => {
 });
 
 // PUT resolve mentor
+const calculateMargin = (price, marginRules) => {
+  // Find slab
+  const rule = marginRules.find(
+    (r) => price >= r.min && price <= r.max
+  );
+
+  // If slab found → use it
+  if (rule) {
+    return rule.margin;
+  }
+
+  // If no slab & price > max → default margin
+  return 1000;
+};
 router.put("/:id", async (req, res) => {
   try {
+    const { teachingModes } = req.body;
+    let updateData = { ...req.body };
+    // ✅ Only recalc when monthlyPrice changes
+    if (teachingModes?.homeTuition?.monthlyPrice !== undefined) {
+      const price = teachingModes.homeTuition.monthlyPrice;
 
+      // 1️⃣ Fetch margin rules
+      const marginRules = await MarginRule.find().lean();
+
+      // 2️⃣ Calculate margin
+      const margin = calculateMargin(price, marginRules);
+
+      // 3️⃣ Final price
+      const finalPrice = price + margin;
+
+      // 4️⃣ Force update derived fields
+      updateData["teachingModes.homeTuition.margin"] = margin;
+      updateData["teachingModes.homeTuition.finalPrice"] = finalPrice;
+    }
     const mentor = await Mentor.findByIdAndUpdate(
       req.params.id,
-      req.body
+      { $set: updateData },
+      { new: true }
     );
 
     res.status(200).json({ data: mentor });
