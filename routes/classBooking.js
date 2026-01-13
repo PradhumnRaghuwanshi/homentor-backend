@@ -480,78 +480,86 @@ router.post("/:id/change-teacher", async (req, res) => {
 
 router.get("/booking-record", async (req, res) => {
   try {
+    console.log("Incoming query:", req.query);
+
     const {
-      keyword,
-      searchType,
-      status,
-      fromDate,
-      toDate,
+      keyword = "",
+      searchType = "",
+      status = "",
+      fromDate = "",
+      toDate = "",
     } = req.query;
 
     let query = {};
 
-    /* ---------------- STATUS ---------------- */
-    if (status && status !== "") {
-      query.status = status;
+    /* ---------- STATUS ---------- */
+    if (status.trim()) {
+      query.status = status.trim();
     }
 
-    /* ---------------- DATE RANGE ---------------- */
-    if ((fromDate && fromDate !== "") || (toDate && toDate !== "")) {
+    /* ---------- DATE RANGE ---------- */
+    if (fromDate.trim() || toDate.trim()) {
       query.createdAt = {};
 
-      if (fromDate && fromDate !== "") {
-        query.createdAt.$gte = new Date(fromDate + "T00:00:00.000Z");
+      if (fromDate.trim()) {
+        const from = new Date(fromDate);
+        if (!isNaN(from)) {
+          query.createdAt.$gte = from;
+        }
       }
 
-      if (toDate && toDate !== "") {
-        query.createdAt.$lte = new Date(toDate + "T23:59:59.999Z");
-      }
-    }
-
-    /* ---------------- SEARCH ---------------- */
-    if (keyword && keyword.trim() !== "") {
-      const search = keyword.trim();
-
-      // Parent-wise search
-      if (searchType === "parent") {
-        query.$or = [
-          { parentPhone: { $regex: search, $options: "i" } },
-          { parentName: { $regex: search, $options: "i" } },
-        ];
-      }
-
-      // Mentor-wise search
-      if (searchType === "mentor") {
-        query.$or = [
-          { mentorPhone: { $regex: search, $options: "i" } },
-          { mentorName: { $regex: search, $options: "i" } },
-        ];
-      }
-
-      // Booking ID search
-      if (searchType === "booking") {
-        if (mongoose.Types.ObjectId.isValid(search)) {
-          query._id = new mongoose.Types.ObjectId(search);
-        } else {
-          // invalid ID → no result, but NOT an error
-          return res.json({ success: true, data: [] });
+      if (toDate.trim()) {
+        const to = new Date(toDate);
+        if (!isNaN(to)) {
+          query.createdAt.$lte = new Date(
+            to.setHours(23, 59, 59, 999)
+          );
         }
       }
     }
 
-    const bookings = await ClassBooking.find(query)
-      .sort({ createdAt: -1 })
-      .limit(200); // safety limit
+    /* ---------- SEARCH ---------- */
+    if (keyword.trim() && searchType.trim()) {
+      const search = keyword.trim();
 
-    res.json({
+      // Booking ID search
+      if (searchType === "booking") {
+        if (!mongoose.Types.ObjectId.isValid(search)) {
+          return res.json({ success: true, data: [] });
+        }
+        query._id = new mongoose.Types.ObjectId(search);
+      }
+
+      // Parent-wise
+      if (searchType === "parent") {
+        query.$or = [
+          { parentPhone: { $regex: search, $options: "i" } },
+        ];
+      }
+
+      // Mentor-wise
+      if (searchType === "mentor") {
+        query.$or = [
+          { mentorPhone: { $regex: search, $options: "i" } },
+        ];
+      }
+    }
+
+    console.log("Final Mongo Query:", query);
+
+    const bookings = await Booking.find(query)
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    return res.json({
       success: true,
       data: bookings,
     });
-  } catch (error) {
-    console.error("Booking Record Error:", error);
-    res.status(500).json({
+  } catch (err) {
+    console.error("BOOKING RECORD ERROR ❌", err);
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
   }
 });
