@@ -319,7 +319,7 @@ router.put("/:id", async (req, res) => {
       const margin = calculateMargin(price, marginRules);
 
       // 3️⃣ Final price
-      const finalPrice = price + margin;
+      const finalPrice = +price + +margin;
 
       // 4️⃣ Force update derived fields
       console.log("check")
