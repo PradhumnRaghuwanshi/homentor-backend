@@ -547,7 +547,7 @@ router.get("/booking-record", async (req, res) => {
 
     console.log("Final Mongo Query:", query);
 
-    const bookings = await Booking.find(query)
+    const bookings = await ClassBooking.find(query)
       .sort({ createdAt: -1 })
       .limit(100);
 
