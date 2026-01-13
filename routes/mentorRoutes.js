@@ -322,8 +322,9 @@ router.put("/:id", async (req, res) => {
       const finalPrice = price + margin;
 
       // 4️⃣ Force update derived fields
-      updateData["teachingModes.homeTuition.margin"] = margin;
-      updateData["teachingModes.homeTuition.finalPrice"] = finalPrice;
+      console.log("check")
+      updateData.teachingModes.homeTuition.margin = margin;
+      updateData.teachingModes.homeTuition.finalPrice = finalPrice;
     }
     const mentor = await Mentor.findByIdAndUpdate(
       req.params.id,
