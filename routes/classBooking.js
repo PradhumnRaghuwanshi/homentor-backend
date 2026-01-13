@@ -82,16 +82,16 @@ router.post("/manual-booking", async (req, res) => {
 
     const mentor = await Mentor.find(req.body.mentorId)
 
-     let lead = await MentorLead.findOne({
-          phone : mentor.phone
-      })
-    
-      if(lead){
-        lead.paidBooked = true
-        lead.status = "paid_booking"
-        await lead.save()
-      }
-    
+    let lead = await MentorLead.findOne({
+      phone: mentor.phone
+    })
+
+    if (lead) {
+      lead.paidBooked = true
+      lead.status = "paid_booking"
+      await lead.save()
+    }
+
 
     // 5️⃣ Send success response
     res.status(201).json({
@@ -154,8 +154,8 @@ router.get("/mentor/:id", async (req, res) => {
         $elemMatch: {
           teacherId: mentorObjectId
         }
-      }, 
-      sessionContinued : false
+      },
+      sessionContinued: false
 
     })
       .populate("parent", "phone address")
@@ -305,7 +305,7 @@ router.post("/:id/mentor-complete", async (req, res) => {
     booking.mentorCompletion = !booking.mentorCompletion;
     if (booking.demoStatus == "running") {
       booking.demoStatus = "completed"
-      
+
     }
 
     await booking.save();
@@ -490,64 +490,68 @@ router.get("/booking-record", async (req, res) => {
 
     let query = {};
 
-    // ---------------- STATUS FILTER ----------------
-    if (status) {
+    /* ---------------- STATUS ---------------- */
+    if (status && status !== "") {
       query.status = status;
     }
 
-    // ---------------- DATE FILTER ----------------
-    if (fromDate || toDate) {
+    /* ---------------- DATE RANGE ---------------- */
+    if ((fromDate && fromDate !== "") || (toDate && toDate !== "")) {
       query.createdAt = {};
-      if (fromDate) {
+
+      if (fromDate && fromDate !== "") {
         query.createdAt.$gte = new Date(fromDate + "T00:00:00.000Z");
       }
-      if (toDate) {
+
+      if (toDate && toDate !== "") {
         query.createdAt.$lte = new Date(toDate + "T23:59:59.999Z");
       }
     }
 
-    // ---------------- SEARCH FILTER ----------------
-    if (keyword && searchType) {
-      // Parent-wise
+    /* ---------------- SEARCH ---------------- */
+    if (keyword && keyword.trim() !== "") {
+      const search = keyword.trim();
+
+      // Parent-wise search
       if (searchType === "parent") {
         query.$or = [
-          { "parent.fullName": { $regex: keyword, $options: "i" } },
+          { parentPhone: { $regex: search, $options: "i" } },
+          { parentName: { $regex: search, $options: "i" } },
         ];
       }
 
-      // Mentor-wise
+      // Mentor-wise search
       if (searchType === "mentor") {
         query.$or = [
-          { "mentor.phone": { $regex: keyword, $options: "i" } },
-          { "mentor.fullName": { $regex: keyword, $options: "i" } },
+          { mentorPhone: { $regex: search, $options: "i" } },
+          { mentorName: { $regex: search, $options: "i" } },
         ];
       }
 
-      // Booking ID
+      // Booking ID search
       if (searchType === "booking") {
-        if (mongoose.Types.ObjectId.isValid(keyword)) {
-          query._id = new mongoose.Types.ObjectId(keyword);
+        if (mongoose.Types.ObjectId.isValid(search)) {
+          query._id = new mongoose.Types.ObjectId(search);
         } else {
-          // Invalid ObjectId → no results
+          // invalid ID → no result, but NOT an error
           return res.json({ success: true, data: [] });
         }
       }
     }
 
     const bookings = await ClassBooking.find(query)
-      .populate("parent", "phone")
-      .populate("mentor", "fullName phone")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(200); // safety limit
 
     res.json({
       success: true,
       data: bookings,
     });
   } catch (error) {
-    console.error("Booking filter error:", error);
+    console.error("Booking Record Error:", error);
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: error.message,
     });
   }
 });
