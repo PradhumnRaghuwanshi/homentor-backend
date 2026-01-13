@@ -478,5 +478,79 @@ router.post("/:id/change-teacher", async (req, res) => {
   }
 });
 
+router.get("/booking-record", async (req, res) => {
+  try {
+    const {
+      keyword,
+      searchType,
+      status,
+      fromDate,
+      toDate,
+    } = req.query;
+
+    let query = {};
+
+    // ---------------- STATUS FILTER ----------------
+    if (status) {
+      query.status = status;
+    }
+
+    // ---------------- DATE FILTER ----------------
+    if (fromDate || toDate) {
+      query.createdAt = {};
+      if (fromDate) {
+        query.createdAt.$gte = new Date(fromDate + "T00:00:00.000Z");
+      }
+      if (toDate) {
+        query.createdAt.$lte = new Date(toDate + "T23:59:59.999Z");
+      }
+    }
+
+    // ---------------- SEARCH FILTER ----------------
+    if (keyword && searchType) {
+      // Parent-wise
+      if (searchType === "parent") {
+        query.$or = [
+          { "parent.fullName": { $regex: keyword, $options: "i" } },
+        ];
+      }
+
+      // Mentor-wise
+      if (searchType === "mentor") {
+        query.$or = [
+          { "mentor.phone": { $regex: keyword, $options: "i" } },
+          { "mentor.fullName": { $regex: keyword, $options: "i" } },
+        ];
+      }
+
+      // Booking ID
+      if (searchType === "booking") {
+        if (mongoose.Types.ObjectId.isValid(keyword)) {
+          query._id = new mongoose.Types.ObjectId(keyword);
+        } else {
+          // Invalid ObjectId → no results
+          return res.json({ success: true, data: [] });
+        }
+      }
+    }
+
+    const bookings = await ClassBooking.find(query)
+      .populate("parent", "phone")
+      .populate("mentor", "fullName phone")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: bookings,
+    });
+  } catch (error) {
+    console.error("Booking filter error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
 
 module.exports = router;
