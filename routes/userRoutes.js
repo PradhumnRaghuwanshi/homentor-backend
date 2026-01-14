@@ -176,4 +176,13 @@ router.post("/logout", (req, res) => {
   });
 });
 
+router.put("/accept-disclaimer/:id", auth, async (req, res) => {
+  await Parent.findByIdAndUpdate(req.params.id, {
+    disclaimerAccepted: true,
+    disclaimers: req.body.disclaimers,
+  });
+
+  res.json({ success: true });
+});
+
 module.exports = router;
