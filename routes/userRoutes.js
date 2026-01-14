@@ -177,7 +177,7 @@ router.post("/logout", (req, res) => {
 });
 
 router.put("/accept-disclaimer/:id", async (req, res) => {
-  await Parent.findByIdAndUpdate(req.params.id, {
+  await User.findByIdAndUpdate(req.params.id, {
     disclaimerAccepted: true,
     disclaimers: req.body.disclaimers,
   });
