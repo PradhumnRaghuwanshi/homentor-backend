@@ -50,12 +50,13 @@ router.post("/", async (req, res) => {
       lead.status = "demo_booked"
       await lead.save()
     }
+
     let parentLead = await ParentLead.findOne({
       phone: parentPhone
     })
     if (parentLead) {
-      parentLead.isCalled = true
-      parentLead.status = "call_done"
+      parentLead.demoBooked = true
+      parentLead.status = "demo_booked"
       await parentLead.save()
     }
 
