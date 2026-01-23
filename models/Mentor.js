@@ -120,7 +120,11 @@ const MentorSchema = new mongoose.Schema({
     default: "silver"
   },
   lastActive: Date,
-  lastActivityText: String
+  lastActivityText: String,
+  isViewedByAdmin: {
+    type: Boolean,
+    default: false
+  }
 });
 
 MentorSchema.index({ coordinates: "2dsphere" });

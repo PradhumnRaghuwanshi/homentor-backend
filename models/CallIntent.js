@@ -33,7 +33,7 @@ const CallIntentSchema = new mongoose.Schema(
       type: String,
       enum: ["initiated", "connected", "missed", "failed"],
       default: "initiated",
-    },
+    }
 
   },
   {

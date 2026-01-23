@@ -19,7 +19,11 @@ const CallLogSchema = new mongoose.Schema(
     direction: String,     // inbound / outbound
     answeredBy: String,    // human / machine
 
-    rawExotelData: Object  // 🔒 full backup (important)
+    rawExotelData: Object,  // 🔒 full backup (important)
+    isViewedByAdmin: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

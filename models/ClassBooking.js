@@ -93,7 +93,11 @@ const classBookingSchema = new mongoose.Schema({
   feedback: { type: String },
   isDemo: { type: Boolean, default: false },
   demoStatus: { type: String, default: "not-demo" },
-  sessionContinued: { type: Boolean, default: "false" }
+  sessionContinued: { type: Boolean, default: "false" },
+  isViewedByAdmin: {
+    type: Boolean,
+    default: false
+  }
 
 });
 
