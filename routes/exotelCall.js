@@ -130,6 +130,8 @@ router.get("/get-mentor-number", async (req, res) => {
   if (parentLead){
     parentLead.isCalled = true
     parentLead.status = "call_done"
+    parentLead.lastActive = new Date(),
+    parentLead.lastActivityText = "Called Mentor"
     await parentLead.save()
   }
   if (lead) {

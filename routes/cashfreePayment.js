@@ -96,6 +96,8 @@ router.get('/verify-order/:id', async (req, res) => {
             if (parentLead) {
                 parentLead.paidBooked = true
                 parentLead.status = "paid_booking"
+                 parentLead.lastActive = new Date(),
+               parentLead.lastActivityText = "Class Booking"
                 await parentLead.save()
             }
 

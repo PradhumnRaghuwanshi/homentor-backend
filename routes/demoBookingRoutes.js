@@ -57,6 +57,8 @@ router.post("/", async (req, res) => {
     if (parentLead) {
       parentLead.demoBooked = true
       parentLead.status = "demo_booked"
+      parentLead.lastActive = new Date(),
+      parentLead.lastActivityText = "Demo Booking"
       await parentLead.save()
     }
 

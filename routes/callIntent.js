@@ -1,12 +1,7 @@
 const express = require("express");
 const router = express.Router();
-
 const CallIntent = require("../models/CallIntent");
 
-/**
- * 🔹 Create Call Intent
- * Used when parent clicks "Call Mentor"
- */
 router.post("/create", async (req, res) => {
   try {
     const { parentPhone, mentorPhone, mentorId } = req.body;

@@ -8,6 +8,9 @@ const parentLeadSchema = new mongoose.Schema(
       trim: true,
     },
 
+    lastActive: Date,
+    lastActivityText: String,
+
     phone: {
       type: String,
       required: true,
