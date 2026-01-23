@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const ClassRecord = require("../models/ClassRecord");
 const ClassBooking = require("../models/ClassBooking");
+const logMentorActivity = require("../utils/logMentorActivity");
 
 // GET all classRecords
 router.get("/", async (req, res) => {
@@ -12,6 +13,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 router.get("/class-booking/:id", async (req, res) => {
   try {
     const classRecords = await ClassRecord.find({
@@ -22,6 +24,7 @@ router.get("/class-booking/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 router.put("/:id", async (req, res) => {
   try {
     const classRecords = await ClassRecord.findByIdAndUpdate(req.params.id, req.body)
@@ -30,6 +33,7 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 router.post("/", async (req, res) => {
   try {
     console.log(req.body);
@@ -66,6 +70,8 @@ router.post("/", async (req, res) => {
 
     // 6️⃣ Save booking
     await classBooking.save();
+
+    await logMentorActivity(classRecord.mentor, "Attendance Marked");
 
     res.status(200).json({ data: classRecord });
 

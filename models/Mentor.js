@@ -118,7 +118,9 @@ const MentorSchema = new mongoose.Schema({
     type: String,
     enum: ["gold", "silver", "budget"],
     default: "silver"
-  }
+  },
+  lastActive: Date,
+  lastActivityText: String
 });
 
 MentorSchema.index({ coordinates: "2dsphere" });

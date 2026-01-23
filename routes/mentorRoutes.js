@@ -3,13 +3,12 @@ const router = express.Router();
 const Mentor = require("../models/Mentor");
 const MentorLead = require("../models/MentorLead");
 const MarginRule = require("../models/MarginRule");
+const logMentorActivity = require("../utils/logMentorActivity");
 
 router.get("/nearby-mentors", async (req, res) => {
   const { lat, lon, subject, classLevel, rank } = req.query;
-
   const adminLat = Number(lat);
   const adminLon = Number(lon);
-
   const mentors = await Mentor.find();
 
   // Convert teaching range "5km" / "25km+" / "anywhere"
@@ -132,13 +131,10 @@ router.get("/", async (req, res) => {
 router.put("/demoType/:type", async (req, res) => {
   try {
     const { type } = req.params;
-
     if (!["free", "paid", "none"].includes(type)) {
       return res.status(400).json({ message: "Invalid demoType" });
     }
-
     await Mentor.updateMany({}, { demoType: type });
-
     res.json({ message: `All mentors updated to demoType: ${type}` });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -149,6 +145,7 @@ router.post("/login-check", async (req, res) => {
   try {
     console.log(req.body.phone)
     const mentor = await Mentor.findOne({ phone: req.body.phone })
+    await logMentorActivity(mentor._id, "Logged in");
     if (!mentor) {
       res.status(404).json({ message: "Mentor not found" });
     }
@@ -161,7 +158,6 @@ router.post("/login-check", async (req, res) => {
 router.get('/selected-mentors', async (req, res) => {
   try {
     const idsParam = req.query.id;
-
     if (!idsParam) return res.status(400).json({ error: 'No IDs provided' });
 
     const idsArray = idsParam.split(',').map((id) => id.trim());
@@ -250,6 +246,9 @@ router.post("/", async (req, res) => {
     }
 
     const mentor = new Mentor(req.body);
+
+    mentor.lastActive = new Date(),
+    mentor.lastActivityText = "Form Submitted"
 
     // ✅ 2. Handle monthlyPrice safely (allow empty)
     const monthlyPrice =
