@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  const leads = await MentorLead.find().sort({ createdAt: -1 });
+  const leads = await MentorLead.find().populate("mentorId", "lastActive lastActivityText phone").sort({ createdAt: -1 });
   res.json(leads);
 });
 

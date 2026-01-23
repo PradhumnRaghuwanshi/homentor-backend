@@ -7,6 +7,11 @@ const mentorLeadSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    
+    mentorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Mentor"
+    },
 
     phone: {
       type: String,
@@ -37,7 +42,7 @@ const mentorLeadSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["lead_generated" ,"first_form", "interview", "second_form", "link_send", "call_done", "demo_booked", "paid_booking"],
+      enum: ["lead_generated", "first_form", "interview", "second_form", "link_send", "call_done", "demo_booked", "paid_booking"],
       default: "lead_generated",
     },
 
@@ -62,15 +67,15 @@ const mentorLeadSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    demoBooked : {
+    demoBooked: {
       type: Boolean,
       default: false,
     },
-    paidBooked : {
+    paidBooked: {
       type: Boolean,
       default: false,
     },
-    
+
 
     interviewDone: {
       type: Boolean,
