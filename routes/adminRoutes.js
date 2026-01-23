@@ -109,10 +109,11 @@ router.post("/logout", (req, res) => {
 
 router.get("/sidebar-counts", async (req, res) => {
   try {
+    console.log("Counting")
     const bookings = await ClassBooking.countDocuments({
       isViewedByAdmin: false,
     });
-
+    console.log(bookings)
     const calls = await CallLog.countDocuments({
       isViewedByAdmin: false,
     });
