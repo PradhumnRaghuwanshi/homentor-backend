@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Admin = require("../models/Admin");
+const ClassBooking = require("../models/ClassBooking");
+const Mentor = require("../models/Mentor");
+const CallLog = require("../models/CallLog");
 
 // GET all admins (Admin can access this)
 router.get("/", async (req, res) => {
@@ -30,7 +33,7 @@ router.post("/", async (req, res) => {
   try {
 
     // Create a new Admin
-    const newAdmin = new Admin( req.body );
+    const newAdmin = new Admin(req.body);
 
     // Save the new admin to the database
     const savedAdmin = await newAdmin.save();
@@ -101,6 +104,20 @@ router.post("/logout", (req, res) => {
       return res.status(500).json({ message: "Failed to logout" });
     }
     res.status(200).json({ message: "Logout successful" });
+  });
+});
+
+router.get("/sidebar-counts", async(req, res) => {
+  const [bookings, calls, mentorRequests] = await Promise.all([
+    ClassBooking.countDocuments({ isViewedByAdmin: false }),
+    CallLog.countDocuments({ isViewedByAdmin: false }),
+    Mentor.countDocuments({ isViewedByAdmin: false })
+  ]);
+
+  res.json({
+    bookings,
+    calls,
+    mentorRequests
   });
 });
 
