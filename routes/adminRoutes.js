@@ -109,11 +109,17 @@ router.post("/logout", (req, res) => {
 
 router.get("/sidebar-counts", async (req, res) => {
   try {
-    const [bookings, calls, mentorRequests] = await Promise.all([
-      ClassBooking.countDocuments({ isViewedByAdmin: false }),
-      CallLog.countDocuments({ isViewedByAdmin: false }),
-      Mentor.countDocuments({ isViewedByAdmin: false }),
-    ]);
+    const bookings = await ClassBooking.countDocuments({
+      isViewedByAdmin: false,
+    });
+
+    const calls = await CallLog.countDocuments({
+      isViewedByAdmin: false,
+    });
+
+    const mentorRequests = await Mentor.countDocuments({
+      isViewedByAdmin: false,
+    });
 
     res.json({
       bookings,
@@ -121,14 +127,15 @@ router.get("/sidebar-counts", async (req, res) => {
       mentorRequests,
     });
   } catch (error) {
-    console.error("Sidebar count error:", error.message);
+    console.error("❌ Sidebar-counts error:", error);
 
     res.status(500).json({
-      message: "Failed to fetch sidebar counts",
+      message: "Sidebar counts failed",
       error: error.message,
     });
   }
 });
+
 
 
 module.exports = router;
