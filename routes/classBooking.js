@@ -70,7 +70,7 @@ router.get("/booking-record", async (req, res) => {
       // Mentor-wise
       if (searchType === "mentor") {
         const mentor = await Mentor.findOne({phone: keyword})
-        query.mentor = parent._id
+        query.mentor = mentor._id
       }
     }
 
