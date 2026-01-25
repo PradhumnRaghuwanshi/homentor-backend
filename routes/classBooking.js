@@ -8,7 +8,7 @@ const Mentor = require("../models/Mentor");
 const MentorLead = require("../models/MentorLead");
 
 // Get all class bookings
-router.get("/", async (req, res) => {
+router.get("/all-parents", async (req, res) => {
   try {
     const bookings = await ClassBooking.find()
       .populate("mentor", "fullName email phone teachingModes") // populate only required fields
