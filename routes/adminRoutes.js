@@ -6,14 +6,14 @@ const Mentor = require("../models/Mentor");
 const CallLog = require("../models/CallLog");
 
 // GET all admins (Admin can access this)
-router.get("/", async (req, res) => {
-  try {
-    const admins = await Admin.find();
-    res.status(200).json({ data: admins });
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
+// router.get("/", async (req, res) => {
+//   try {
+//     const admins = await Admin.find();
+//     res.status(200).json({ data: admins });
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
 
 // GET admin by ID
 router.get("/:id", async (req, res) => {
