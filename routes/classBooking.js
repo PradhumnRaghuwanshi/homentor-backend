@@ -567,9 +567,9 @@ router.post("/:id/change-teacher", async (req, res) => {
 router.get("/booking-record", async (req, res) => {
   try {
     const bookings = await ClassBooking.find()
-      .populate("mentor", "fullName email phone teachingModes") // populate only required fields
-      .populate("parent", "fullName phone")       // populate only required fields
-      .sort({ createdAt: -1 });
+      // .populate("mentor", "fullName email phone teachingModes") // populate only required fields
+      // .populate("parent", "fullName phone")       // populate only required fields
+      // .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, data: bookings });
   } catch (error) {
