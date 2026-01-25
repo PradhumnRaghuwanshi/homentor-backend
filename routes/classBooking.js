@@ -10,6 +10,18 @@ const MentorLead = require("../models/MentorLead");
 // Get all class bookings
 router.get("/all-parents", async (req, res) => {
   try {
+    console.log("Incoming query:", req.query);
+
+    const {
+      keyword = "",
+      searchType = "",
+      status = "",
+      fromDate = "",
+      toDate = "",
+    } = req.query;
+
+    let query = {};
+    
     const bookings = await ClassBooking.find()
       .populate("mentor", "fullName email phone teachingModes") // populate only required fields
       .populate("parent", "fullName phone")       // populate only required fields
