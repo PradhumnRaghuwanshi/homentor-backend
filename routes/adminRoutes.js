@@ -109,7 +109,7 @@ router.post("/logout", (req, res) => {
 
 router.get("/sidebar-counts", async (req, res) => {
   try {
-    // console.log("Counting")
+    console.log("Counting")
     // const bookings = await ClassBooking.countDocuments({
     //   isViewedByAdmin: false,
     // });
@@ -127,10 +127,11 @@ router.get("/sidebar-counts", async (req, res) => {
     //   calls,
     //   mentorRequests,
     // });
-    const bookings = await ClassBooking.find({
-      isViewedByAdmin: false
-    })
-    res.status(200).json(bookings.length)
+    // const bookings = await ClassBooking.find({
+    //   isViewedByAdmin: false
+    // })
+    // res.status(200).json(bookings.length)
+
   } catch (error) {
     console.error("❌ Sidebar-counts error:", error);
 
