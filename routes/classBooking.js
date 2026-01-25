@@ -77,7 +77,7 @@ router.get("/all-parents", async (req, res) => {
 
     console.log("Final Mongo Query:", query);
     
-    const bookings = await ClassBooking.find()
+    const bookings = await ClassBooking.find(query)
       .populate("mentor", "fullName email phone teachingModes") // populate only required fields
       .populate("parent", "fullName phone")       // populate only required fields
       .sort({ createdAt: -1 });
