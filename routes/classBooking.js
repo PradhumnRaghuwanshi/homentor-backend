@@ -480,7 +480,7 @@ router.post("/:id/change-teacher", async (req, res) => {
 
 router.get("/booking-record", async (req, res) => {
   try {
-    console.log("Incoming query:", req.query);
+    console.log("Incoming query:");
 
     const {
       keyword = "",
