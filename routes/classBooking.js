@@ -51,6 +51,7 @@ router.get("/all-parents", async (req, res) => {
     /* ---------- SEARCH ---------- */
     if (keyword.trim() && searchType.trim()) {
       const search = keyword.trim();
+      
 
       // Booking ID search
       if (searchType === "booking") {
@@ -62,8 +63,10 @@ router.get("/all-parents", async (req, res) => {
 
       // Parent-wise
       if (searchType === "parent") {
+        const parent = User.findOne({phone: keyword})
+        // query.parent = parent._id
         query.$or = [
-          { parentPhone: { $regex: search, $options: "i" } },
+          { parent: { $regex: parent._id, $options: "i" } },
         ];
       }
 
