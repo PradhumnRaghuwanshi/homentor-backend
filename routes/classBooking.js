@@ -630,19 +630,19 @@ router.post("/:id/change-teacher", async (req, res) => {
 //   }
 // });
 
-router.get("/", async (req, res) => {
-  try {
-    const bookings = await ClassBooking.find()
-      .populate("mentor", "fullName email phone teachingModes") // populate only required fields
-      .populate("parent", "fullName phone")       // populate only required fields
-      .sort({ createdAt: -1 });
+// router.get("/", async (req, res) => {
+//   try {
+//     const bookings = await ClassBooking.find()
+//       .populate("mentor", "fullName email phone teachingModes") // populate only required fields
+//       .populate("parent", "fullName phone")       // populate only required fields
+//       .sort({ createdAt: -1 });
 
-    res.status(200).json({ success: true, data: bookings });
-  } catch (error) {
-    console.error("Error fetching bookings:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-});
+//     res.status(200).json({ success: true, data: bookings });
+//   } catch (error) {
+//     console.error("Error fetching bookings:", error);
+//     res.status(500).json({ success: false, message: "Server Error" });
+//   }
+// });
 
 
 module.exports = router;
