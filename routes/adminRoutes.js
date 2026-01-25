@@ -100,27 +100,25 @@ router.post("/logout", (req, res) => {
 router.get("/", async (req, res) => {
   try {
     console.log("Counting")
-    // const bookings = await ClassBooking.countDocuments({
-    //   isViewedByAdmin: false,
-    // });
-    // console.log(bookings)
-    // const calls = await CallLog.countDocuments({
-    //   isViewedByAdmin: false,
-    // });
+    const bookings = await ClassBooking.countDocuments({
+      isViewedByAdmin: false,
+    });
+    console.log(bookings)
+    const calls = await CallLog.countDocuments({
+      isViewedByAdmin: false,
+    });
 
-    // const mentorRequests = await Mentor.countDocuments({
-    //   isViewedByAdmin: false,
-    // });
+    const mentorRequests = await Mentor.countDocuments({
+      isViewedByAdmin: false,
+    });
 
-    // res.json({
-    //   bookings,
-    //   calls,
-    //   mentorRequests,
-    // });
-    const bookings = await ClassBooking.find({
-      isViewedByAdmin: false
-    })
-    res.status(200).json(bookings.length)
+    res.json({
+      bookings,
+      calls,
+      mentorRequests,
+    });
+    
+   
 
   } catch (error) {
     console.error("❌ Sidebar-counts error:", error);
