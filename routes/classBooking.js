@@ -63,7 +63,7 @@ router.get("/all-parents", async (req, res) => {
 
       // Parent-wise
       if (searchType === "parent") {
-        const parent = User.findOne({phone: keyword})
+        const parent = await User.findOne({phone: keyword})
         query.parent = parent._id
         // query.$or = [
         //   { parent: { $regex: parent._id, $options: "i" } },
