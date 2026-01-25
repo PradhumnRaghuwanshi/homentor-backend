@@ -478,89 +478,103 @@ router.post("/:id/change-teacher", async (req, res) => {
   }
 });
 
+// router.get("/booking-record", async (req, res) => {
+//   try {
+//     console.log("Incoming query:");
+
+//     const {
+//       keyword = "",
+//       searchType = "",
+//       status = "",
+//       fromDate = "",
+//       toDate = "",
+//     } = req.query;
+
+//     let query = {};
+
+//     /* ---------- STATUS ---------- */
+//     // if (status.trim()) {
+//     //   query.status = status.trim();
+//     // }
+
+//     /* ---------- DATE RANGE ---------- */
+//     // if (fromDate.trim() || toDate.trim()) {
+//     //   query.createdAt = {};
+
+//     //   if (fromDate.trim()) {
+//     //     const from = new Date(fromDate);
+//     //     if (!isNaN(from)) {
+//     //       query.createdAt.$gte = from;
+//     //     }
+//     //   }
+
+//     //   if (toDate.trim()) {
+//     //     const to = new Date(toDate);
+//     //     if (!isNaN(to)) {
+//     //       query.createdAt.$lte = new Date(
+//     //         to.setHours(23, 59, 59, 999)
+//     //       );
+//     //     }
+//     //   }
+//     // }
+
+//     /* ---------- SEARCH ---------- */
+//     // if (keyword.trim() && searchType.trim()) {
+//     //   const search = keyword.trim();
+
+//     //   // Booking ID search
+//     //   if (searchType === "booking") {
+//     //     if (!mongoose.Types.ObjectId.isValid(search)) {
+//     //       return res.json({ success: true, data: [] });
+//     //     }
+//     //     query._id = new mongoose.Types.ObjectId(search);
+//     //   }
+
+//     //   // Parent-wise
+//     //   if (searchType === "parent") {
+//     //     query.$or = [
+//     //       { parentPhone: { $regex: search, $options: "i" } },
+//     //     ];
+//     //   }
+
+//     //   // Mentor-wise
+//     //   if (searchType === "mentor") {
+//     //     query.$or = [
+//     //       { mentorPhone: { $regex: search, $options: "i" } },
+//     //     ];
+//     //   }
+//     // }
+
+//     console.log("Final Mongo Query:", query);
+
+//     const bookings = await ClassBooking.find()
+//       .sort({ createdAt: -1 })
+//       .limit(100);
+
+//     return res.json({
+//       success: true,
+//       data: bookings,
+//     });
+//   } catch (err) {
+//     console.error("BOOKING RECORD ERROR ❌", err);
+//     return res.status(500).json({
+//       success: false,
+//       message: err.message,
+//     });
+//   }
+// });
+
 router.get("/booking-record", async (req, res) => {
   try {
-    console.log("Incoming query:");
-
-    const {
-      keyword = "",
-      searchType = "",
-      status = "",
-      fromDate = "",
-      toDate = "",
-    } = req.query;
-
-    let query = {};
-
-    /* ---------- STATUS ---------- */
-    // if (status.trim()) {
-    //   query.status = status.trim();
-    // }
-
-    /* ---------- DATE RANGE ---------- */
-    // if (fromDate.trim() || toDate.trim()) {
-    //   query.createdAt = {};
-
-    //   if (fromDate.trim()) {
-    //     const from = new Date(fromDate);
-    //     if (!isNaN(from)) {
-    //       query.createdAt.$gte = from;
-    //     }
-    //   }
-
-    //   if (toDate.trim()) {
-    //     const to = new Date(toDate);
-    //     if (!isNaN(to)) {
-    //       query.createdAt.$lte = new Date(
-    //         to.setHours(23, 59, 59, 999)
-    //       );
-    //     }
-    //   }
-    // }
-
-    /* ---------- SEARCH ---------- */
-    // if (keyword.trim() && searchType.trim()) {
-    //   const search = keyword.trim();
-
-    //   // Booking ID search
-    //   if (searchType === "booking") {
-    //     if (!mongoose.Types.ObjectId.isValid(search)) {
-    //       return res.json({ success: true, data: [] });
-    //     }
-    //     query._id = new mongoose.Types.ObjectId(search);
-    //   }
-
-    //   // Parent-wise
-    //   if (searchType === "parent") {
-    //     query.$or = [
-    //       { parentPhone: { $regex: search, $options: "i" } },
-    //     ];
-    //   }
-
-    //   // Mentor-wise
-    //   if (searchType === "mentor") {
-    //     query.$or = [
-    //       { mentorPhone: { $regex: search, $options: "i" } },
-    //     ];
-    //   }
-    // }
-
-    console.log("Final Mongo Query:", query);
-
     const bookings = await ClassBooking.find()
-      .sort({ createdAt: -1 })
-      .limit(100);
+      .populate("mentor", "fullName email phone teachingModes") // populate only required fields
+      .populate("parent", "fullName phone")       // populate only required fields
+      .sort({ createdAt: -1 });
 
-    return res.json({
-      success: true,
-      data: bookings,
-    });
-  } catch (err) {
-    console.error("BOOKING RECORD ERROR ❌", err);
-    return res.status(500).json({
-      success: false,
-      message: err.message,
-    });
+    res.status(200).json({ success: true, data: bookings });
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 });
 
