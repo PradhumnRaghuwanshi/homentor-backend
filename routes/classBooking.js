@@ -8,7 +8,7 @@ const Mentor = require("../models/Mentor");
 const MentorLead = require("../models/MentorLead");
 
 // Get all class bookings
-router.get("/all-parents", async (req, res) => {
+router.get("/booking-record", async (req, res) => {
   try {
     console.log("Incoming query:", req.query);
 
@@ -65,16 +65,12 @@ router.get("/all-parents", async (req, res) => {
       if (searchType === "parent") {
         const parent = await User.findOne({phone: keyword})
         query.parent = parent._id
-        // query.$or = [
-        //   { parent: { $regex: parent._id, $options: "i" } },
-        // ];
       }
 
       // Mentor-wise
       if (searchType === "mentor") {
-        query.$or = [
-          { mentorPhone: { $regex: search, $options: "i" } },
-        ];
+        const mentor = await Mentor.findOne({phone: keyword})
+        query.mentor = parent._id
       }
     }
 
@@ -634,12 +630,12 @@ router.post("/:id/change-teacher", async (req, res) => {
 //   }
 // });
 
-router.get("/booking-record", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const bookings = await ClassBooking.find()
-      // .populate("mentor", "fullName email phone teachingModes") // populate only required fields
-      // .populate("parent", "fullName phone")       // populate only required fields
-      // .sort({ createdAt: -1 });
+      .populate("mentor", "fullName email phone teachingModes") // populate only required fields
+      .populate("parent", "fullName phone")       // populate only required fields
+      .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, data: bookings });
   } catch (error) {
