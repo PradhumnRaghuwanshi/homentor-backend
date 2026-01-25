@@ -493,61 +493,61 @@ router.get("/booking-record", async (req, res) => {
     let query = {};
 
     /* ---------- STATUS ---------- */
-    if (status.trim()) {
-      query.status = status.trim();
-    }
+    // if (status.trim()) {
+    //   query.status = status.trim();
+    // }
 
     /* ---------- DATE RANGE ---------- */
-    if (fromDate.trim() || toDate.trim()) {
-      query.createdAt = {};
+    // if (fromDate.trim() || toDate.trim()) {
+    //   query.createdAt = {};
 
-      if (fromDate.trim()) {
-        const from = new Date(fromDate);
-        if (!isNaN(from)) {
-          query.createdAt.$gte = from;
-        }
-      }
+    //   if (fromDate.trim()) {
+    //     const from = new Date(fromDate);
+    //     if (!isNaN(from)) {
+    //       query.createdAt.$gte = from;
+    //     }
+    //   }
 
-      if (toDate.trim()) {
-        const to = new Date(toDate);
-        if (!isNaN(to)) {
-          query.createdAt.$lte = new Date(
-            to.setHours(23, 59, 59, 999)
-          );
-        }
-      }
-    }
+    //   if (toDate.trim()) {
+    //     const to = new Date(toDate);
+    //     if (!isNaN(to)) {
+    //       query.createdAt.$lte = new Date(
+    //         to.setHours(23, 59, 59, 999)
+    //       );
+    //     }
+    //   }
+    // }
 
     /* ---------- SEARCH ---------- */
-    if (keyword.trim() && searchType.trim()) {
-      const search = keyword.trim();
+    // if (keyword.trim() && searchType.trim()) {
+    //   const search = keyword.trim();
 
-      // Booking ID search
-      if (searchType === "booking") {
-        if (!mongoose.Types.ObjectId.isValid(search)) {
-          return res.json({ success: true, data: [] });
-        }
-        query._id = new mongoose.Types.ObjectId(search);
-      }
+    //   // Booking ID search
+    //   if (searchType === "booking") {
+    //     if (!mongoose.Types.ObjectId.isValid(search)) {
+    //       return res.json({ success: true, data: [] });
+    //     }
+    //     query._id = new mongoose.Types.ObjectId(search);
+    //   }
 
-      // Parent-wise
-      if (searchType === "parent") {
-        query.$or = [
-          { parentPhone: { $regex: search, $options: "i" } },
-        ];
-      }
+    //   // Parent-wise
+    //   if (searchType === "parent") {
+    //     query.$or = [
+    //       { parentPhone: { $regex: search, $options: "i" } },
+    //     ];
+    //   }
 
-      // Mentor-wise
-      if (searchType === "mentor") {
-        query.$or = [
-          { mentorPhone: { $regex: search, $options: "i" } },
-        ];
-      }
-    }
+    //   // Mentor-wise
+    //   if (searchType === "mentor") {
+    //     query.$or = [
+    //       { mentorPhone: { $regex: search, $options: "i" } },
+    //     ];
+    //   }
+    // }
 
     console.log("Final Mongo Query:", query);
 
-    const bookings = await ClassBooking.find(query)
+    const bookings = await ClassBooking.find()
       .sort({ createdAt: -1 })
       .limit(100);
 
