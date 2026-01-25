@@ -14,7 +14,7 @@ router.post("/save-fcm-token", async (req, res) => {
 // GET all users
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().sort({ createdAt: -1 });
     res.status(200).json({ data: users });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
