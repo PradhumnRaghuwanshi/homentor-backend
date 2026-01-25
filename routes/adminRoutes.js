@@ -116,9 +116,7 @@ router.get("/", async (req, res) => {
       bookings,
       calls,
       mentorRequests,
-    });
-    
-   
+    }); 
 
   } catch (error) {
     console.error("❌ Sidebar-counts error:", error);
