@@ -5,16 +5,6 @@ const ClassBooking = require("../models/ClassBooking");
 const Mentor = require("../models/Mentor");
 const CallLog = require("../models/CallLog");
 
-// GET all admins (Admin can access this)
-// router.get("/", async (req, res) => {
-//   try {
-//     const admins = await Admin.find();
-//     res.status(200).json({ data: admins });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
 // GET admin by ID
 router.get("/:id", async (req, res) => {
   try {
@@ -107,7 +97,7 @@ router.post("/logout", (req, res) => {
   });
 });
 
-router.get("/sidebar-counts", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     console.log("Counting")
     // const bookings = await ClassBooking.countDocuments({
@@ -127,10 +117,10 @@ router.get("/sidebar-counts", async (req, res) => {
     //   calls,
     //   mentorRequests,
     // });
-    // const bookings = await ClassBooking.find({
-    //   isViewedByAdmin: false
-    // })
-    // res.status(200).json(bookings.length)
+    const bookings = await ClassBooking.find({
+      isViewedByAdmin: false
+    })
+    res.status(200).json(bookings.length)
 
   } catch (error) {
     console.error("❌ Sidebar-counts error:", error);
