@@ -88,6 +88,24 @@ router.get("/booking-record", async (req, res) => {
   }
 });
 
+router.put("/mark-viewed", async (req, res) => {
+  try {
+    await ClassBooking.updateMany(
+      { isViewedByAdmin: false },
+      { isViewedByAdmin: true }
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Mark viewed error:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to mark as viewed",
+    });
+  }
+});
+
 // POST /api/class-bookings
 router.post("/", async (req, res) => {
   try {
