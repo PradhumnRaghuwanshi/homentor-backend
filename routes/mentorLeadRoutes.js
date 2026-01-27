@@ -8,6 +8,7 @@ router.post("/", async (req, res) => {
   try {
     let lead = await MentorLead.create(req.body);
     const mentor = await Mentor.findOne({phone : req.body.phone})
+    console.log(mentor)
     if(mentor){
       lead.leadFormFilled = true
       await lead.save()
