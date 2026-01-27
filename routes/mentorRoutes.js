@@ -199,6 +199,7 @@ router.get('/visible-mentors', async (req, res) => {
     showOnWebsite: true
   })
   res.status(200).json({ data: visibleMentors })
+
 })
 
 router.get('/gold-mentor', async (req, res) => {
@@ -615,7 +616,6 @@ router.get("/recommended-mentors", async (req, res) => {
     });
   }
 });
-
 
 
 
