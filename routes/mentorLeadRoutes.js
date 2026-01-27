@@ -11,6 +11,7 @@ router.post("/", async (req, res) => {
     console.log(mentor)
     if(mentor){
       lead.leadFormFilled = true
+      lead.mentorId = mentor._id
       await lead.save()
     }
     res.status(201).json(lead);
