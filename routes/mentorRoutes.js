@@ -193,14 +193,14 @@ router.get('/approved-mentors', async (req, res) => {
   res.status(200).json({ data: pendingMentors })
 })
 
-// router.get('/visible-mentors', async (req, res) => {
-//   const visibleMentors = await Mentor.find({
-//     status: "Approved",
-//     showOnWebsite: true
-//   })
-//   res.status(200).json({ data: visibleMentors })
+router.get('/visible-mentors', async (req, res) => {
+  const visibleMentors = await Mentor.find({
+    status: "Approved",
+    showOnWebsite: true
+  })
+  res.status(200).json({ data: visibleMentors })
 
-// })
+})
 
 router.get('/gold-mentor', async (req, res) => {
   const goldMentors = await Mentor.find({
@@ -564,87 +564,87 @@ function buildRecommendationPipeline({
   ];
 }
 
-router.get("/visible-mentors", async (req, res) => {
-  try {
-    console.log("Hi")
-    const { lat, lon, city } = req.query;
+// router.get("/visible-mentors", async (req, res) => {
+//   try {
+//     console.log("Hi")
+//     const { lat, lon, city } = req.query;
 
-    const hasLocation = lat && lon;
+//     const hasLocation = lat && lon;
 
-    /* ===============================
-       📍 CASE 1: Exact Location
-    =============================== */
-    if (hasLocation) {
-      const variant = Math.random() < 0.5 ? "A" : "B";
+//     /* ===============================
+//        📍 CASE 1: Exact Location
+//     =============================== */
+//     if (hasLocation) {
+//       const variant = Math.random() < 0.5 ? "A" : "B";
 
-      const pipeline = buildRecommendationPipeline({
-        parentLat: Number(lat),
-        parentLon: Number(lon),
-        parentCity: city,
-        variant,
-      });
+//       const pipeline = buildRecommendationPipeline({
+//         parentLat: Number(lat),
+//         parentLon: Number(lon),
+//         parentCity: city,
+//         variant,
+//       });
 
-      const result = await Mentor.aggregate(pipeline);
+//       const result = await Mentor.aggregate(pipeline);
 
-      const mentors = result[0]?.mentors || [];
+//       const mentors = result[0]?.mentors || [];
 
-      await Mentor.updateMany(
-        { _id: { $in: mentors.map((m) => m._id) } },
-        { $set: { lastShownAt: new Date() } }
-      );
+//       await Mentor.updateMany(
+//         { _id: { $in: mentors.map((m) => m._id) } },
+//         { $set: { lastShownAt: new Date() } }
+//       );
 
-      return res.json({
-        success: true,
-        count: mentors.length,
-        mentors,
-        mode: "geo",
-      });
-    }
+//       return res.json({
+//         success: true,
+//         count: mentors.length,
+//         mentors,
+//         mode: "geo",
+//       });
+//     }
 
-    /* ===============================
-       🏙 CASE 2: City Only
-    =============================== */
-    if (city) {
-      const mentors = await Mentor.find({
-        "location.city": city,
-        isActive: true,
-      })
-        .sort({ rating: -1, lastShownAt: 1 })
-        .limit(8);
+//     /* ===============================
+//        🏙 CASE 2: City Only
+//     =============================== */
+//     if (city) {
+//       const mentors = await Mentor.find({
+//         "location.city": city,
+//         isActive: true,
+//       })
+//         .sort({ rating: -1, lastShownAt: 1 })
+//         .limit(8);
 
-      return res.json({
-        success: true,
-        count: mentors.length,
-        mentors,
-        mode: "city",
-      });
-    }
+//       return res.json({
+//         success: true,
+//         count: mentors.length,
+//         mentors,
+//         mode: "city",
+//       });
+//     }
 
-    /* ===============================
-       ⭐ CASE 3: No Info → Default
-    =============================== */
-    const mentors = await Mentor.find({
-      isActive: true,
-    })
-      .sort({ rating: -1, lastShownAt: 1 })
-      .limit(8);
+//     /* ===============================
+//        ⭐ CASE 3: No Info → Default
+//     =============================== */
+//     const mentors = await Mentor.find({
+//       isActive: true,
+//     })
+//       .sort({ rating: -1, lastShownAt: 1 })
+//       .limit(8);
 
-    res.json({
-      success: true,
-      count: mentors.length,
-      mentors,
-      mode: "default",
-    });
+//     res.json({
+//       success: true,
+//       count: mentors.length,
+//       mentors,
+//       mode: "default",
+//     });
 
-  } catch (error) {
-    console.error("Mentor recommendation error:", error);
+//   } catch (error) {
+//     console.error("Mentor recommendation error:", error);
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// });
 
 
 
