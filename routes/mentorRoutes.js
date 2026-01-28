@@ -193,14 +193,14 @@ router.get('/approved-mentors', async (req, res) => {
   res.status(200).json({ data: pendingMentors })
 })
 
-router.get('/visible-mentors', async (req, res) => {
-  const visibleMentors = await Mentor.find({
-    status: "Approved",
-    showOnWebsite: true
-  })
-  res.status(200).json({ data: visibleMentors })
+// router.get('/visible-mentors', async (req, res) => {
+//   const visibleMentors = await Mentor.find({
+//     status: "Approved",
+//     showOnWebsite: true
+//   })
+//   res.status(200).json({ data: visibleMentors })
 
-})
+// })
 
 router.get('/gold-mentor', async (req, res) => {
   const goldMentors = await Mentor.find({
@@ -564,7 +564,7 @@ function buildRecommendationPipeline({
   ];
 }
 
-router.get("/recommended-mentors", async (req, res) => {
+router.get("/visible-mentors", async (req, res) => {
   try {
     const {
       lat,
