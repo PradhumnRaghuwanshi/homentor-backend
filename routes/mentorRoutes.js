@@ -194,6 +194,8 @@ router.get('/approved-mentors', async (req, res) => {
 })
 
 router.get('/visible-mentors', async (req, res) => {
+  console.log("Hi")
+    const { lat, lon, city } = req.query;
   const visibleMentors = await Mentor.find({
     status: "Approved",
     showOnWebsite: true
