@@ -566,56 +566,86 @@ function buildRecommendationPipeline({
 
 router.get("/visible-mentors", async (req, res) => {
   try {
-    const {
-      lat,
-      lon,
-      city,
-      parentId,
-    } = req.query;
-    console.log("Hii")
-    // 1️⃣ Validate input
-    if (!lat || !lon || !city || !parentId) {
-      return res.status(400).json({
-        success: false,
-        message: "lat, lon, city and parentId are required",
+    console.log("Hi")
+    const { lat, lon, city } = req.query;
+
+    const hasLocation = lat && lon;
+
+    /* ===============================
+       📍 CASE 1: Exact Location
+    =============================== */
+    if (hasLocation) {
+      const variant = Math.random() < 0.5 ? "A" : "B";
+
+      const pipeline = buildRecommendationPipeline({
+        parentLat: Number(lat),
+        parentLon: Number(lon),
+        parentCity: city,
+        variant,
+      });
+
+      const result = await Mentor.aggregate(pipeline);
+
+      const mentors = result[0]?.mentors || [];
+
+      await Mentor.updateMany(
+        { _id: { $in: mentors.map((m) => m._id) } },
+        { $set: { lastShownAt: new Date() } }
+      );
+
+      return res.json({
+        success: true,
+        count: mentors.length,
+        mentors,
+        mode: "geo",
       });
     }
 
-    // 2️⃣ A/B testing variant
-    const variant = Number(parentId) % 2 === 0 ? "A" : "B";
+    /* ===============================
+       🏙 CASE 2: City Only
+    =============================== */
+    if (city) {
+      const mentors = await Mentor.find({
+        "location.city": city,
+        isActive: true,
+      })
+        .sort({ rating: -1, lastShownAt: 1 })
+        .limit(8);
 
-    // 3️⃣ Build aggregation pipeline
-    const pipeline = buildRecommendationPipeline({
-      parentLat: Number(lat),
-      parentLon: Number(lon),
-      parentCity: city,
-      variant,
-    });
+      return res.json({
+        success: true,
+        count: mentors.length,
+        mentors,
+        mode: "city",
+      });
+    }
 
-    // 4️⃣ Execute aggregation
-    const result = await Mentor.aggregate(pipeline);
-    const mentors = result[0]?.mentors || [];
+    /* ===============================
+       ⭐ CASE 3: No Info → Default
+    =============================== */
+    const mentors = await Mentor.find({
+      isActive: true,
+    })
+      .sort({ rating: -1, lastShownAt: 1 })
+      .limit(8);
 
-    // 5️⃣ Update rotation info
-    await Mentor.updateMany(
-      { _id: { $in: mentors.map((m) => m._id) } },
-      { $set: { lastShownAt: new Date() } }
-    );
-
-    // 6️⃣ Send response
     res.json({
       success: true,
       count: mentors.length,
       mentors,
+      mode: "default",
     });
+
   } catch (error) {
     console.error("Mentor recommendation error:", error);
+
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: error.message,
     });
   }
 });
+
 
 
 
