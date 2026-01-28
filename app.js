@@ -13,6 +13,7 @@ app.use("/api/otp", require("./routes/otpRoutes"));
 app.use("/api/class-bookings", require('./routes/classBooking.js'));
 app.use("/api/class-records", require('./routes/classRecordRoutes.js'));
 app.use('/api/admin', require('./routes/adminRoutes'))
+app.use("/api/degrees", require('./routes/degreeRoutes.js'));
 app.use('/api/users', require('./routes/userRoutes'))
 app.use('/api', require('./routes/callMentor'))
 app.use('/api/mentor',require('./routes/mentorRoutes'))
