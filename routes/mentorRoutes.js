@@ -202,7 +202,7 @@ router.get('/visible-mentors', async (req, res) => {
   // })
   // res.status(200).json({ data: visibleMentors })
   try {
-    console.log("Hi22")
+
     const { lat, lon, city } = req.query;
 
     const hasLocation = lat && lon;
@@ -260,7 +260,7 @@ router.get('/visible-mentors', async (req, res) => {
        ⭐ CASE 3: No Info → Default
     =============================== */
     const mentors = await Mentor.find({
-      isActive: true,
+      status: "Approved",
     })
       .sort({ rating: -1, lastShownAt: 1 })
       .limit(8);
