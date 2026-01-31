@@ -194,13 +194,6 @@ router.get('/approved-mentors', async (req, res) => {
 })
 
 router.get('/visible-mentors', async (req, res) => {
-  // console.log("Hi")
-  //   const { lat, lon, city } = req.query;
-  //   const visibleMentors = await Mentor.find({
-  //   status: "Approved",
-  //   showOnWebsite: true
-  // })
-  // res.status(200).json({ data: visibleMentors })
   try {
 
     const { lat, lon, city } = req.query;
@@ -644,85 +637,20 @@ function buildRecommendationPipeline({
     },
   ];
 }
-
-router.get("/visible-mentors", async (req, res) => {
+router.put("/mark-viewed", async (req, res) => {
   try {
-    console.log("Hi")
-    const { lat, lon, city } = req.query;
+    await Mentor.updateMany(
+      { isViewedByAdmin: false },
+      { isViewedByAdmin: true }
+    );
 
-    const hasLocation = lat && lon;
-
-    /* ===============================
-       📍 CASE 1: Exact Location
-    =============================== */
-    if (hasLocation) {
-      const variant = Math.random() < 0.5 ? "A" : "B";
-
-      const pipeline = buildRecommendationPipeline({
-        parentLat: Number(lat),
-        parentLon: Number(lon),
-        parentCity: city,
-        variant,
-      });
-
-      const result = await Mentor.aggregate(pipeline);
-
-      const mentors = result[0]?.mentors || [];
-
-      await Mentor.updateMany(
-        { _id: { $in: mentors.map((m) => m._id) } },
-        { $set: { lastShownAt: new Date() } }
-      );
-
-      return res.json({
-        success: true,
-        count: mentors.length,
-        mentors,
-        mode: "geo",
-      });
-    }
-
-    /* ===============================
-       🏙 CASE 2: City Only
-    =============================== */
-    if (city) {
-      const mentors = await Mentor.find({
-        "location.city": city,
-        isActive: true,
-      })
-        .sort({ rating: -1, lastShownAt: 1 })
-        .limit(8);
-
-      return res.json({
-        success: true,
-        count: mentors.length,
-        mentors,
-        mode: "city",
-      });
-    }
-
-    /* ===============================
-       ⭐ CASE 3: No Info → Default
-    =============================== */
-    const mentors = await Mentor.find({
-      isActive: true,
-    })
-      .sort({ rating: -1, lastShownAt: 1 })
-      .limit(8);
-
-    res.json({
-      success: true,
-      count: mentors.length,
-      mentors,
-      mode: "default",
-    });
-
-  } catch (error) {
-    console.error("Mentor recommendation error:", error);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Mark viewed error:", err);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to mark as viewed",
     });
   }
 });
