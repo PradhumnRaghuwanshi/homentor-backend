@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const MentorSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String },
-  phone: { type: String, required: true },
+  phone: { type: String, required: true, unique: true },
   gender: { type: String },
   age: { type: Number },
   profilePhoto: { type: String },

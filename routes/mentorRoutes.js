@@ -343,7 +343,7 @@ router.post("/", async (req, res) => {
 
     const newMentor = await mentor.save();
 
-    const mentorLead = await MentorLead.find({
+    const mentorLead = await MentorLead.findOne({
       phone: req.body.phone
     })
     if (mentorLead) {
