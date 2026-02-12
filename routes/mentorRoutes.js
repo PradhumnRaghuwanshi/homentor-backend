@@ -254,6 +254,7 @@ router.get('/visible-mentors', async (req, res) => {
     =============================== */
     const mentors = await Mentor.find({
       status: "Approved",
+      showOnWebsite: true
     })
       .sort({ rating: -1, lastShownAt: 1 })
       .limit(8);
